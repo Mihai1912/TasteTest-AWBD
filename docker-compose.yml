@@ -1,0 +1,14 @@
+services:
+  tastetest-app-db:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - tastetest-app-db-vol:/var/lib/postgresql/data
+
+volumes:
+  tastetest-app-db-vol:
