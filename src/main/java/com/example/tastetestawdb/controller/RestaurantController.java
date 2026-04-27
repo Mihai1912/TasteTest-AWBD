@@ -73,6 +73,28 @@ public class RestaurantController implements SecuredRestController{
         }
     }
 
+    @RequestMapping(path = "/getRatings/{id}", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<Double> getRatings(@PathVariable UUID id) {
+        try {
+            return ResponseEntity.status(200).body(restaurantService.getRatings(id));
+        } catch (Exception e) {
+            logger.error("Error getting ratings for restaurant with id: " + id, e);
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/top-rated", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<List<RestaurantDto>> getTopRatedRestaurants() {
+        try {
+            return ResponseEntity.status(200).body(restaurantService.getTopRatedRestaurants());
+        } catch (Exception e) {
+            logger.error("Error getting top rated restaurants", e);
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
     @RequestMapping(path = "/getRestaurantId/{name}", method = RequestMethod.GET)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<UUID> getRestaurantId(@PathVariable String name) {

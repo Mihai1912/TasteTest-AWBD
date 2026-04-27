@@ -1,9 +1,11 @@
 package com.example.tastetestawdb.service;
 
-import com.example.tastetestawdb.entity.Restaurant;
 import com.example.tastetestawdb.controller.AuthController;
+import com.example.tastetestawdb.entity.Restaurant;
+import com.example.tastetestawdb.entity.Review;
 import com.example.tastetestawdb.entity.User;
 import com.example.tastetestawdb.repository.RestaurantRepository;
+import com.example.tastetestawdb.repository.ReviewRepository;
 import com.example.tastetestawdb.repository.UserRepository;
 import com.example.tastetestawdb.service.dto.RestaurantDto;
 import jakarta.transaction.Transactional;
@@ -19,13 +21,15 @@ import java.util.*;
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     public RestaurantService(RestaurantRepository restaurantRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository, ReviewRepository reviewRepository) {
         this.restaurantRepository = restaurantRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public RestaurantDto addRestaurant(RestaurantDto restaurantDto) {
@@ -88,6 +92,16 @@ public class RestaurantService {
         )).toList();
     }
 
+    public double getRatings(UUID id) {
+        Optional<List<Review>> reviews = reviewRepository.findAllByRestaurantId(id);
+        if (reviews.isEmpty()) {
+            throw new RuntimeException("No reviews found for this restaurant");
+        }
+
+        double sum = reviews.get().stream().mapToDouble(Review::getRating).sum();
+        return sum / reviews.get().size();
+    }
+
     private Restaurant checkRestaurant(UUID id) {
         Optional<Restaurant> restaurant = restaurantRepository.findRestaurantById(id);
         if (restaurant.isEmpty()) {
@@ -105,6 +119,33 @@ public class RestaurantService {
             throw new RuntimeException("You are not the owner of this restaurant");
         }
         owner.get();
+    }
+
+    public List<RestaurantDto> getTopRatedRestaurants() {
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        Map<UUID, Double> restaurantRatings = new HashMap<>();
+        for (Restaurant restaurant : restaurants) {
+            List<Review> reviews = reviewRepository.findAllByRestaurantId(restaurant.getId()).orElse(Collections.emptyList());
+            double averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
+            restaurantRatings.put(restaurant.getId(), averageRating);
+        }
+        List<RestaurantDto> topRatedRestaurants = new ArrayList<>();
+        restaurantRatings.entrySet().stream()
+                .sorted(Map.Entry.<UUID, Double>comparingByValue().reversed())
+                .limit(3)
+                .forEach(entry -> {
+                    Restaurant restaurant = restaurantRepository.findRestaurantById(entry.getKey()).orElse(null);
+                    if (restaurant != null) {
+                        topRatedRestaurants.add(new RestaurantDto(
+                                restaurant.getName(),
+                                restaurant.getAddress(),
+                                restaurant.getPhone(),
+                                restaurant.getWebsite(),
+                                restaurant.getSchedule()
+                        ));
+                    }
+                });
+        return topRatedRestaurants;
     }
 
     public UUID getRestaurantId (String name) {
