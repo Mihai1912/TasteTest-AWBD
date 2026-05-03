@@ -3,6 +3,7 @@ package com.example.tastetestawdb.service.dto;
 import java.util.UUID;
 
 public class RestaurantDto {
+    private UUID id;
     private String name;
     private String address;
     private String phone;
@@ -18,6 +19,24 @@ public class RestaurantDto {
         this.phone = phone;
         this.website = website;
         this.schedule = schedule;
+    }
+
+    public RestaurantDto(UUID id, String name, String address, String phone, String website, String schedule) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.phone = phone;
+        this.website = website;
+        this.schedule = schedule;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public RestaurantDto setId(UUID id) {
+        this.id = id;
+        return this;
     }
 
     public String getName() {

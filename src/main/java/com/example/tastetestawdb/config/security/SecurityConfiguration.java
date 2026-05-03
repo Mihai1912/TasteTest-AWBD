@@ -36,9 +36,11 @@ public class SecurityConfiguration {
            http.authorizeHttpRequests(auth -> auth
                    .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register",
                            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                   .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                    .anyRequest().authenticated())
                    .exceptionHandling((exception)-> exception.authenticationEntryPoint(authEntryPoint))
-                   .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                   .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                   .cors(cors -> {}); // Enable CORS support
            http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         } else {
             http.authorizeHttpRequests(auth -> auth

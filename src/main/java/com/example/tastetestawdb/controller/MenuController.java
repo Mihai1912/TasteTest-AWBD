@@ -32,7 +32,7 @@ public class MenuController implements SecuredRestController {
 
     @RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
-    public ResponseEntity<UUID> deleteMenu(@RequestParam UUID id) {
+    public ResponseEntity<UUID> deleteMenu(@PathVariable UUID id) {
         try {
             return ResponseEntity.status(200).body(menuService.deleteMenu(id));
         } catch (Exception e) {
@@ -42,7 +42,7 @@ public class MenuController implements SecuredRestController {
 
     @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
-    public ResponseEntity<MenuDto> updateMenu(@RequestParam UUID id,
+    public ResponseEntity<MenuDto> updateMenu(@PathVariable UUID id,
                                               @RequestParam String name) {
         try {
             return ResponseEntity.status(200).body(menuService.updateMenu(id, name));
@@ -53,7 +53,7 @@ public class MenuController implements SecuredRestController {
 
     @RequestMapping(path = "/get/{id}", method = RequestMethod.GET)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<MenuDto> getMenu(@RequestParam UUID id) {
+    public ResponseEntity<MenuDto> getMenu(@PathVariable UUID id) {
         try {
             return ResponseEntity.status(200).body(menuService.getMenu(id));
         } catch (Exception e) {

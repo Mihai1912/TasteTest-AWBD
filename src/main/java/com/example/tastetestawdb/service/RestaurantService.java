@@ -74,7 +74,8 @@ public class RestaurantService {
 
     public RestaurantDto getRestaurant(UUID id) {
         Restaurant restaurantEntity = checkRestaurant(id);
-        return new RestaurantDto(restaurantEntity.getName(),
+        return new RestaurantDto(restaurantEntity.getId(),
+                restaurantEntity.getName(),
                 restaurantEntity.getAddress(),
                 restaurantEntity.getPhone(),
                 restaurantEntity.getWebsite(),
@@ -84,6 +85,7 @@ public class RestaurantService {
     public List<RestaurantDto> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return restaurants.stream().map(restaurant -> new RestaurantDto(
+                restaurant.getId(),
                 restaurant.getName(),
                 restaurant.getAddress(),
                 restaurant.getPhone(),
@@ -137,6 +139,7 @@ public class RestaurantService {
                     Restaurant restaurant = restaurantRepository.findRestaurantById(entry.getKey()).orElse(null);
                     if (restaurant != null) {
                         topRatedRestaurants.add(new RestaurantDto(
+                                restaurant.getId(),
                                 restaurant.getName(),
                                 restaurant.getAddress(),
                                 restaurant.getPhone(),
