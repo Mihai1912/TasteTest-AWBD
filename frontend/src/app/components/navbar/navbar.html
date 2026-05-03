@@ -1,0 +1,19 @@
+<nav class="navbar">
+  <div class="nav-content">
+    <a routerLink="/home" class="logo">TasteTest</a>
+    <div class="nav-links">
+      <a routerLink="/restaurants">Restaurants</a>
+      <a routerLink="/feedback">Feedback</a>
+      <div class="nav-auth">
+        <ng-container *ngIf="isLoggedIn">
+          <span class="username">{{ username }}</span>
+          <button (click)="logout()" class="logout-btn">Logout</button>
+        </ng-container>
+        <ng-container *ngIf="!isLoggedIn">
+          <a routerLink="/login">Login</a>
+          <a routerLink="/register">Register</a>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</nav>

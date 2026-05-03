@@ -1,0 +1,29 @@
+<div class="feedback-container">
+  <h2>Send Feedback</h2>
+  <form (ngSubmit)="submitFeedback()">
+    <div class="form-group">
+      <label>Feedback Type:</label>
+      <select [(ngModel)]="feedback.feedbackType" name="feedbackType" required>
+        <option value="">Select...</option>
+        <option value="BUG">Bug Report</option>
+        <option value="FEATURE">Feature Request</option>
+        <option value="OTHER">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Experience:</label>
+      <select [(ngModel)]="feedback.experience" name="experience" required>
+        <option value="">Select...</option>
+        <option value="GOOD">Good</option>
+        <option value="BAD">Bad</option>
+        <option value="AVERAGE">Average</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Comment:</label>
+      <textarea [(ngModel)]="feedback.comment" name="comment" required></textarea>
+    </div>
+    <button type="submit" [disabled]="loading">{{ loading ? 'Sending...' : 'Send Feedback' }}</button>
+  </form>
+  <div *ngIf="message" class="message">{{ message }}</div>
+</div>

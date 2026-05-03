@@ -1,0 +1,28 @@
+<div class="admin-container">
+  <h2>Admin Panel</h2>
+  
+  <div class="section">
+    <h3>User Reviews</h3>
+    <div class="form-group">
+      <label>User ID:</label>
+      <input [(ngModel)]="userId" type="text" />
+      <button (click)="searchUserReviews()">Search</button>
+    </div>
+    <div *ngIf="userReviews.length > 0">
+      <div *ngFor="let review of userReviews" class="review">
+        <p><strong>{{ review.urserName }}</strong> - {{ review.rating }}/5</p>
+        <p>{{ review.comment }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Manage Roles</h3>
+    <div *ngFor="let role of roles; let i = index">
+      <input [(ngModel)]="roles[i]" type="text" placeholder="Role name" />
+      <button (click)="removeRole(i)">Remove</button>
+    </div>
+    <button (click)="addRole(roles.length - 1)">Add Role</button>
+    <button (click)="submitRoles()">Submit Roles</button>
+  </div>
+</div>

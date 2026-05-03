@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,8 +29,8 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private LoginResponseDto loginResponseDto;
+    @Value("${token.ttl}")
+    private long tokenTtl;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
@@ -47,7 +48,7 @@ public class AuthController {
         logger.info("Request to login for user {}", loginDto.getEmail());
         String token = authService.login(loginDto);
         logger.info("Successfully logged in user {}", loginDto.getEmail());
-        return new ResponseEntity<>(loginResponseDto.setToken(token), HttpStatus.OK);
+        return new ResponseEntity<>(new LoginResponseDto(token, "Bearer", tokenTtl), HttpStatus.OK);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")

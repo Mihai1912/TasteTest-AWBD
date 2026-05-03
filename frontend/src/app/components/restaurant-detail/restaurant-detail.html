@@ -1,0 +1,24 @@
+<div class="detail-container" *ngIf="restaurant">
+  <h2>{{ restaurant.name }}</h2>
+  <p><strong>Address:</strong> {{ restaurant.address }}</p>
+  <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+  <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
+  <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+  <p><strong>Rating:</strong> {{ rating.toFixed(2) }}/5</p>
+  
+  <div class="section">
+    <h3>Menus</h3>
+    <div *ngFor="let menu of menus">
+      <p><a [routerLink]="['/menus', menu.id]">{{ menu.name }}</a></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Reviews</h3>
+    <a [routerLink]="['/restaurants', restaurantId, 'review']" class="btn">Add Review</a>
+    <div *ngFor="let review of reviews" class="review">
+      <p><strong>{{ review.urserName }}</strong> - Rating: {{ review.rating }}/5</p>
+      <p>{{ review.comment }}</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,26 @@
+<div class="form-container">
+  <h2>{{ isEditMode ? 'Edit' : 'Add' }} Restaurant</h2>
+  <form (ngSubmit)="saveRestaurant()">
+    <div class="form-group">
+      <label>Name:</label>
+      <input [(ngModel)]="restaurant.name" name="name" required />
+    </div>
+    <div class="form-group">
+      <label>Address:</label>
+      <input [(ngModel)]="restaurant.address" name="address" required />
+    </div>
+    <div class="form-group">
+      <label>Phone:</label>
+      <input [(ngModel)]="restaurant.phone" name="phone" required />
+    </div>
+    <div class="form-group">
+      <label>Website:</label>
+      <input [(ngModel)]="restaurant.website" name="website" required />
+    </div>
+    <div class="form-group">
+      <label>Schedule:</label>
+      <input [(ngModel)]="restaurant.schedule" name="schedule" required />
+    </div>
+    <button type="submit" [disabled]="loading">{{ loading ? 'Saving...' : 'Save' }}</button>
+  </form>
+</div>

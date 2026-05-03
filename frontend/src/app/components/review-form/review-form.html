@@ -1,0 +1,24 @@
+<div class="form-container">
+  <h2>Add Review</h2>
+  <form (ngSubmit)="submitReview()">
+    <div class="form-group">
+      <label>Username:</label>
+      <input [(ngModel)]="review.urserName" name="urserName" required />
+    </div>
+    <div class="form-group">
+      <label>Rating (1-5):</label>
+      <select [(ngModel)]="review.rating" name="rating">
+        <option value="1">1 - Poor</option>
+        <option value="2">2 - Fair</option>
+        <option value="3">3 - Good</option>
+        <option value="4">4 - Very Good</option>
+        <option value="5">5 - Excellent</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Comment:</label>
+      <textarea [(ngModel)]="review.comment" name="comment" required></textarea>
+    </div>
+    <button type="submit" [disabled]="loading">{{ loading ? 'Submitting...' : 'Submit Review' }}</button>
+  </form>
+</div>
