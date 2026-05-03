@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './review-form.html',
-  styleUrl: './review-form.css',
+  styleUrls: ['./review-form.css'],
 })
 export class ReviewForm implements OnInit {
   review: ReviewDto = { comment: '', rating: 5, urserName: '' };

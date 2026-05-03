@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { LoginDto, RegisterDto, LoginResponseDto } from '../models/auth.model';
 import { ApiService } from './api.service';
@@ -8,6 +8,17 @@ import { ApiService } from './api.service';
   providedIn: 'root'
 })
 export class AuthService {
+  private readonly accessTokenKey = 'access_token';
+  private readonly tokenTypeKey = 'token_type';
+  private readonly expiresInKey = 'expires_in';
+  private readonly userEmailKey = 'user_email';
+
+  private readonly loggedInSubject = new BehaviorSubject<boolean>(!!localStorage.getItem(this.accessTokenKey));
+  private readonly userEmailSubject = new BehaviorSubject<string | null>(localStorage.getItem(this.userEmailKey));
+
+  readonly isLoggedIn$ = this.loggedInSubject.asObservable();
+  readonly userEmail$ = this.userEmailSubject.asObservable();
+
   constructor(private apiService: ApiService) {}
 
   register(registerDto: RegisterDto): Observable<any> {
@@ -17,9 +28,24 @@ export class AuthService {
   login(loginDto: LoginDto): Observable<LoginResponseDto> {
     return this.apiService.post<LoginResponseDto>('/auth/login', loginDto).pipe(
       tap(response => {
-        localStorage.setItem('access_token', response.access_token);
-        localStorage.setItem('token_type', response.token_type);
-        localStorage.setItem('expires_in', response.expires_in.toString());
+        // normalize possible response shapes
+        const token = (response as any).access_token || (response as any).token || (response as any).accessToken;
+        const type = (response as any).token_type || (response as any).tokenType || 'Bearer';
+        const expires = (response as any).expires_in || (response as any).expiresIn || 0;
+
+        if (token) {
+          localStorage.setItem(this.accessTokenKey, token);
+        }
+        if (type) {
+          localStorage.setItem(this.tokenTypeKey, type);
+        }
+        if (expires !== undefined && expires !== null) {
+          localStorage.setItem(this.expiresInKey, expires.toString());
+        }
+
+        localStorage.setItem(this.userEmailKey, loginDto.email);
+        this.loggedInSubject.next(!!token);
+        this.userEmailSubject.next(loginDto.email);
       })
     );
   }
@@ -29,13 +55,16 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('token_type');
-    localStorage.removeItem('expires_in');
+    localStorage.removeItem(this.accessTokenKey);
+    localStorage.removeItem(this.tokenTypeKey);
+    localStorage.removeItem(this.expiresInKey);
+    localStorage.removeItem(this.userEmailKey);
+    this.loggedInSubject.next(false);
+    this.userEmailSubject.next(null);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem(this.accessTokenKey);
   }
 
   isLoggedIn(): boolean {

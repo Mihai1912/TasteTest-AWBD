@@ -5,14 +5,14 @@
       <a routerLink="/restaurants">Restaurants</a>
       <a routerLink="/feedback">Feedback</a>
       <div class="nav-auth">
-        <ng-container *ngIf="isLoggedIn">
-          <span class="username">{{ username }}</span>
+        <ng-container *ngIf="isLoggedIn$ | async; else loggedOutLinks">
+          <span class="username">{{ userEmail$ | async }}</span>
           <button (click)="logout()" class="logout-btn">Logout</button>
         </ng-container>
-        <ng-container *ngIf="!isLoggedIn">
+        <ng-template #loggedOutLinks>
           <a routerLink="/login">Login</a>
           <a routerLink="/register">Register</a>
-        </ng-container>
+        </ng-template>
       </div>
     </div>
   </div>

@@ -1,24 +1,40 @@
-<div class="detail-container" *ngIf="restaurant">
-  <h2>{{ restaurant.name }}</h2>
-  <p><strong>Address:</strong> {{ restaurant.address }}</p>
-  <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-  <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
-  <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
-  <p><strong>Rating:</strong> {{ rating.toFixed(2) }}/5</p>
-  
-  <div class="section">
-    <h3>Menus</h3>
-    <div *ngFor="let menu of menus">
-      <p><a [routerLink]="['/menus', menu.id]">{{ menu.name }}</a></p>
-    </div>
-  </div>
+<div class="detail-container">
+  <div *ngIf="loading" class="loading">Loading restaurant details...</div>
 
-  <div class="section">
-    <h3>Reviews</h3>
-    <a [routerLink]="['/restaurants', restaurantId, 'review']" class="btn">Add Review</a>
-    <div *ngFor="let review of reviews" class="review">
-      <p><strong>{{ review.urserName }}</strong> - Rating: {{ review.rating }}/5</p>
-      <p>{{ review.comment }}</p>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <ng-container *ngIf="restaurant">
+    <div class="detail-header">
+      <h2>{{ restaurant.name }}</h2>
+      <a [routerLink]="['/restaurants', restaurantId, 'edit']" class="btn">Edit Restaurant</a>
     </div>
+
+    <p><strong>Address:</strong> {{ restaurant.address }}</p>
+    <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+    <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
+    <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+    <p><strong>Rating:</strong> {{ rating.toFixed(2) }}/5</p>
+
+    <div class="section">
+      <h3>Menus</h3>
+      <p *ngIf="menus.length === 0">No menus available.</p>
+      <div *ngFor="let menu of menus">
+        <p><a [routerLink]="['/menus', menu.id]">{{ menu.name }}</a></p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Reviews</h3>
+      <a [routerLink]="['/restaurants', restaurantId, 'review']" class="btn">Add Review</a>
+      <p *ngIf="reviews.length === 0">No reviews yet.</p>
+      <div *ngFor="let review of reviews" class="review">
+        <p><strong>{{ review.urserName }}</strong> - Rating: {{ review.rating }}/5</p>
+        <p>{{ review.comment }}</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <div *ngIf="!loading && !restaurant && !error" class="empty-state">
+    Restaurant details are not available.
   </div>
 </div>

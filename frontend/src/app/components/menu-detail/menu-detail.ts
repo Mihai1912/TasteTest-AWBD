@@ -9,7 +9,7 @@ import { MenuItemDto } from '../../models/menu-item.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './menu-detail.html',
-  styleUrl: './menu-detail.css',
+  styleUrls: ['./menu-detail.css'],
 })
 export class MenuDetail implements OnInit {
   menuId: string = '';

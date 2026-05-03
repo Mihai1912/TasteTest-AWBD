@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './feedback-form.html',
-  styleUrl: './feedback-form.css',
+  styleUrls: ['./feedback-form.css'],
 })
 export class FeedbackForm {
   feedback: FeedbackDto = { feedbackType: '', experience: '', comment: '' };

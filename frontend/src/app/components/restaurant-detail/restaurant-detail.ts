@@ -8,13 +8,15 @@ import { MenuService } from '../../services/menu.service';
 import { RestaurantDto } from '../../models/restaurant.model';
 import { ReviewIdDto } from '../../models/review.model';
 import { MenuDto } from '../../models/menu.model';
+import { of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-restaurant-detail',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './restaurant-detail.html',
-  styleUrl: './restaurant-detail.css',
+  styleUrls: ['./restaurant-detail.css'],
 })
 export class RestaurantDetail implements OnInit {
   restaurant: RestaurantDto | null = null;
@@ -22,6 +24,8 @@ export class RestaurantDetail implements OnInit {
   menus: MenuDto[] = [];
   rating: number = 0;
   restaurantId: string = '';
+  loading = false;
+  error: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -32,35 +36,69 @@ export class RestaurantDetail implements OnInit {
 
   ngOnInit() {
     this.restaurantId = this.route.snapshot.paramMap.get('id') || '';
+    if (!this.restaurantId) {
+      this.error = 'Missing restaurant id';
+      return;
+    }
+
     this.loadRestaurant();
   }
 
   loadRestaurant() {
-    this.restaurantService.getRestaurant(this.restaurantId).subscribe(
-      (data) => {
-        this.restaurant = data;
+    this.loading = true;
+    this.error = null;
+
+    this.restaurantService.getRestaurant(this.restaurantId).pipe(
+      catchError((err) => {
+        console.error('Failed to load restaurant:', err);
+        this.error = 'Unable to load restaurant details.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.loading = false;
+      })
+    ).subscribe((restaurant) => {
+      this.restaurant = restaurant;
+      if (restaurant) {
         this.loadRating();
+        this.loadReviews();
+        this.loadMenus();
+      } else if (!this.error) {
+        this.error = 'Restaurant not found.';
       }
-    );
-    this.loadReviews();
-    this.loadMenus();
+    });
   }
 
   loadRating() {
-    this.restaurantService.getRatings(this.restaurantId).subscribe((rating) => {
+    this.restaurantService.getRatings(this.restaurantId).pipe(
+      catchError((err) => {
+        console.error('Failed to load ratings:', err);
+        return of(0);
+      })
+    ).subscribe((rating) => {
       this.rating = rating;
     });
   }
 
   loadReviews() {
-    this.reviewService.getRestaurantReviews(this.restaurantId).subscribe((data) => {
-      this.reviews = data;
+    this.reviewService.getRestaurantReviews(this.restaurantId).pipe(
+      catchError((err) => {
+        console.error('Failed to load reviews:', err);
+        return of([] as ReviewIdDto[]);
+      })
+    ).subscribe((reviews) => {
+      this.reviews = reviews;
     });
   }
 
   loadMenus() {
-    this.menuService.getRestaurantMenus(this.restaurantId).subscribe((data) => {
-      this.menus = data;
+    this.menuService.getRestaurantMenus(this.restaurantId).pipe(
+      catchError((err) => {
+        console.error('Failed to load menus:', err);
+        return of([] as MenuDto[]);
+      })
+    ).subscribe((menus) => {
+      this.menus = menus;
     });
   }
 }

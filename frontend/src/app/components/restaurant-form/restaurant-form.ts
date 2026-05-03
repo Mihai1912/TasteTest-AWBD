@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './restaurant-form.html',
-  styleUrl: './restaurant-form.css',
+  styleUrls: ['./restaurant-form.css'],
 })
 export class RestaurantForm implements OnInit {
   restaurant: RestaurantDto = { name: '', address: '', phone: '', website: '', schedule: '' };

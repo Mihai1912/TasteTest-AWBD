@@ -9,7 +9,7 @@ import { RestaurantDto } from '../../models/restaurant.model';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './restaurants.html',
-  styleUrl: './restaurants.css',
+  styleUrls: ['./restaurants.css'],
 })
 export class Restaurants implements OnInit {
   restaurants: RestaurantDto[] = [];
