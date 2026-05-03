@@ -1,0 +1,73 @@
+package com.example.tastetestawdb.controller;
+
+import com.example.tastetestawdb.service.MenuService;
+import com.example.tastetestawdb.service.dto.MenuDto;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/v1/menus")
+public class MenuController implements SecuredRestController {
+    public final MenuService menuService;
+
+    public MenuController(MenuService menuService) {
+        this.menuService = menuService;
+    }
+
+    @RequestMapping(path = "/add", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    public ResponseEntity<MenuDto> addMenu(@RequestParam String name,
+                                           @RequestParam String restaurantName) {
+        try {
+            return ResponseEntity.status(201).body(menuService.addMenu(name, restaurantName));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    public ResponseEntity<UUID> deleteMenu(@RequestParam UUID id) {
+        try {
+            return ResponseEntity.status(200).body(menuService.deleteMenu(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    public ResponseEntity<MenuDto> updateMenu(@RequestParam UUID id,
+                                              @RequestParam String name) {
+        try {
+            return ResponseEntity.status(200).body(menuService.updateMenu(id, name));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/get/{id}", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<MenuDto> getMenu(@RequestParam UUID id) {
+        try {
+            return ResponseEntity.status(200).body(menuService.getMenu(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/getRestaurantMenus/{restaurantId}", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<List<MenuDto>> getRestaurantMenus(@PathVariable UUID restaurantId) {
+        try {
+            return ResponseEntity.status(200).body(menuService.getRestaurantMenus(restaurantId));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+}
