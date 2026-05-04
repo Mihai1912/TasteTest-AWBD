@@ -1,0 +1,23 @@
+<div class="form-container">
+  <h2 *ngIf="isEditMode">Edit Menu Item</h2>
+  <h2 *ngIf="!isEditMode">Add Menu Item</h2>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <div *ngIf="!loading">
+    <label for="name">Name</label>
+    <input id="name" name="name" [(ngModel)]="item.name" />
+
+    <label for="price">Price</label>
+    <input id="price" name="price" type="number" [(ngModel)]="item.price" />
+
+    <label for="description">Description</label>
+    <textarea id="description" name="description" [(ngModel)]="item.description"></textarea>
+
+    <div class="actions">
+      <button class="btn" (click)="save()" [disabled]="loading">Save</button>
+      <a class="btn" [routerLink]="['/menus', isEditMode ? item.menuId : menuId]">Cancel</a>
+    </div>
+  </div>
+</div>
+

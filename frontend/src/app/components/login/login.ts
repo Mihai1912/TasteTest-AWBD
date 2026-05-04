@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { LoginDto } from '../../models/auth.model';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -23,19 +24,26 @@ export class Login {
   login() {
     this.error = '';
     this.loading = true;
+    this.log('Submitting login request', { email: this.loginDto.email });
     this.authService.login(this.loginDto)
       .pipe(finalize(() => (this.loading = false)))
       .subscribe(
         (response) => {
-          // navigate after successful login
+          this.log('Login successful, navigating to restaurants', response);
           this.router.navigate(['/restaurants']);
         },
         (error) => {
-          // Log full error to console for debugging and show a friendly message
-          console.error('Login error:', error);
-          // prefer server message but fall back to http message
+          this.errorLog('Login error', error);
           this.error = error?.error?.message || error?.message || 'Login failed';
         }
       );
+  }
+
+  private log(message: string, data?: unknown): void {
+    console.debug(`[Login] ${message}`, data ?? '');
+  }
+
+  private errorLog(message: string, data?: unknown): void {
+    console.error(`[Login] ${message}`, data ?? '');
   }
 }

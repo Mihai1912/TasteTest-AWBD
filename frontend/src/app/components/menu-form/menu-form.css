@@ -1,0 +1,23 @@
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.actions {
+  margin-top: 12px;
+}
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 8px;
+  background: #2d7ef7;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.hint {
+  margin-top: 6px;
+  color: #666;
+  font-size: 0.9rem;
+}
+

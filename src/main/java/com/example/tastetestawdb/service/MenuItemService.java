@@ -13,6 +13,7 @@ import com.example.tastetestawdb.service.dto.MenuItemDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -42,20 +43,21 @@ public class MenuItemService {
     }
 
     public MenuItemDto addMenuItem(MenuItemDto menuItemDto, UUID menuId) {
-        checkMenu(menuId);
+        Menu menu = checkMenu(menuId);
+        checkRestaurantOwnerOrAdmin(menu);
         MenuItem menuItem = new MenuItem();
         menuItem.setName(menuItemDto.getName());
         menuItem.setPrice(menuItemDto.getPrice());
         menuItem.setDescription(menuItemDto.getDescription());
         menuItem.setMenuId(menuId);
         menuItemRepository.save(menuItem);
-        return menuItemDto;
+        return new MenuItemDto(menuItem.getId().toString(), menuItem.getMenuId().toString(), menuItem.getName(), menuItem.getPrice(), menuItem.getDescription());
     }
 
     public UUID deleteMenuItem(UUID menuItemId) {
         MenuItem menuItem = checkMenuItem(menuItemId);
         Menu menu = checkMenu(menuItem.getMenuId());
-        checkRestaurantOwner(menu);
+        checkRestaurantOwnerOrAdmin(menu);
         menuItemRepository.delete(menuItem);
         return menuItemId;
     }
@@ -63,18 +65,17 @@ public class MenuItemService {
     public MenuItemDto updateMenuItem(MenuItemDto menuItemDto, UUID menuItemId) {
         MenuItem menuItem = checkMenuItem(menuItemId);
         Menu menu = checkMenu(menuItem.getMenuId());
-        checkRestaurantOwner(menu);
+        checkRestaurantOwnerOrAdmin(menu);
         menuItem.setName(menuItemDto.getName());
         menuItem.setPrice(menuItemDto.getPrice());
         menuItem.setDescription(menuItemDto.getDescription());
         menuItemRepository.save(menuItem);
-        return menuItemDto;
+        return new MenuItemDto(menuItem.getId().toString(), menuItem.getMenuId().toString(), menuItem.getName(), menuItem.getPrice(), menuItem.getDescription());
     }
 
     public MenuItemDto getMenuItem(UUID menuItemId) {
-        return new MenuItemDto(checkMenuItem(menuItemId).getName(),
-                checkMenuItem(menuItemId).getPrice(),
-                checkMenuItem(menuItemId).getDescription());
+        MenuItem mi = checkMenuItem(menuItemId);
+        return new MenuItemDto(mi.getId().toString(), mi.getMenuId().toString(), mi.getName(), mi.getPrice(), mi.getDescription());
     }
 
     private Menu checkMenu(UUID menuId) {
@@ -85,7 +86,11 @@ public class MenuItemService {
         return menu.get();
     }
 
-    private void checkRestaurantOwner(Menu menu) {
+    private void checkRestaurantOwnerOrAdmin(Menu menu) {
+        if (isAdmin()) {
+            return;
+        }
+
         Optional<Restaurant> restaurant = restaurantRepository.findRestaurantById(menu.getRestaurantId());
         if (restaurant.isEmpty()) {
             throw new IllegalArgumentException("Restaurant not found");
@@ -98,6 +103,12 @@ public class MenuItemService {
             throw new IllegalArgumentException("User is not the owner of the restaurant");
         }
         user.get();
+    }
+
+    private boolean isAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ADMIN"::equals);
     }
 
     private MenuItem checkMenuItem(UUID menuItemId) {
@@ -118,7 +129,7 @@ public class MenuItemService {
             throw new IllegalArgumentException("Menu items not found");
         }
         return menuItems.get().stream()
-                .map(menuItem -> new MenuItemDto(menuItem.getName(), menuItem.getPrice(), menuItem.getDescription()))
+                .map(menuItem -> new MenuItemDto(menuItem.getId().toString(), menuItem.getMenuId().toString(), menuItem.getName(), menuItem.getPrice(), menuItem.getDescription()))
                 .collect(Collectors.toList());
     }
 }

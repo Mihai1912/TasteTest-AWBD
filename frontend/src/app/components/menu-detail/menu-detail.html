@@ -1,10 +1,21 @@
 <div class="menu-container">
   <h2>Menu Items</h2>
+  <!-- Edit menu only visible to admin users -->
+  <a *ngIf="isAdmin" [routerLink]="['/menus', menuId, 'edit']" class="btn">Edit Menu</a>
+  <!-- Add item visible to owners and admins -->
+  <button *ngIf="canManageItems" class="btn" (click)="addItem()">Add Item</button>
   <div class="items-list">
+    <div *ngIf="loading">Loading items...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+    <div *ngIf="!loading && !error && items.length === 0">No items in this menu.</div>
     <div *ngFor="let item of items" class="item">
       <h4>{{ item.name }}</h4>
       <p>Price: ${{ item.price }}</p>
       <p>{{ item.description }}</p>
+      <div class="item-actions">
+        <a *ngIf="canManageItems" [routerLink]="['/menu-items', item.id, 'edit']" class="btn">Edit</a>
+        <button *ngIf="canManageItems" class="btn" (click)="deleteItem(item.id || '')">Delete</button>
+      </div>
     </div>
   </div>
 </div>

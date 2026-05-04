@@ -20,7 +20,7 @@ public class MenuController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuDto> addMenu(@RequestParam String name,
                                            @RequestParam String restaurantName) {
         try {
@@ -31,7 +31,7 @@ public class MenuController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/delete/{id}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<UUID> deleteMenu(@PathVariable UUID id) {
         try {
             return ResponseEntity.status(200).body(menuService.deleteMenu(id));
@@ -41,7 +41,7 @@ public class MenuController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuDto> updateMenu(@PathVariable UUID id,
                                               @RequestParam String name) {
         try {

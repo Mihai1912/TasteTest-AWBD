@@ -10,6 +10,7 @@ import com.example.tastetestawdb.service.dto.MenuDto;
 
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class MenuService {
 
     public MenuDto addMenu(String name, String restaurantName) {
         Restaurant restaurant = checkRestaurant(restaurantName);
-        checkRestaurantOwner(restaurantName);
+        checkRestaurantOwnerOrAdmin(restaurant);
         Menu menu = new Menu();
         menu.setName(name);
         menu.setRestaurantId(restaurant.getId());
@@ -44,12 +45,14 @@ public class MenuService {
 
     public UUID deleteMenu(UUID id) {
         Menu menu = checkMenu(id);
+        checkMenuOwnerOrAdmin(menu);
         menuRepository.delete(menu);
         return id;
     }
 
     public MenuDto updateMenu(UUID id, String name) {
         Menu menu = checkMenu(id);
+        checkMenuOwnerOrAdmin(menu);
         menu.setName(name);
         menuRepository.save(menu);
         return new MenuDto(menu.getName(), menu.getId());
@@ -59,20 +62,40 @@ public class MenuService {
         return new MenuDto(checkMenu(id).getName(), id);
     }
 
-    private void checkRestaurantOwner(String restaurantName) {
+    private void checkRestaurantOwnerOrAdmin(Restaurant restaurant) {
+        if (isAdmin()) {
+            return;
+        }
         Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
         if (user.isEmpty()) {
             throw new RuntimeException("User not found");
         }
-        Restaurant restaurant = checkRestaurant(restaurantName);
-
         if (!restaurant.getOwnerId().equals(user.get().getId())) {
             throw new RuntimeException("User is not the owner of the restaurant");
         }
     }
 
+    private void checkMenuOwnerOrAdmin(Menu menu) {
+        Restaurant restaurant = checkRestaurantById(menu.getRestaurantId());
+        checkRestaurantOwnerOrAdmin(restaurant);
+    }
+
+    private boolean isAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ADMIN"::equals);
+    }
+
     private Restaurant checkRestaurant(String restaurantName) {
         Optional<Restaurant> restaurant = restaurantRepository.findRestaurantByName(restaurantName);
+        if (restaurant.isEmpty()) {
+            throw new RuntimeException("Restaurant not found");
+        }
+        return restaurant.get();
+    }
+
+    private Restaurant checkRestaurantById(UUID restaurantId) {
+        Optional<Restaurant> restaurant = restaurantRepository.findRestaurantById(restaurantId);
         if (restaurant.isEmpty()) {
             throw new RuntimeException("Restaurant not found");
         }

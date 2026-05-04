@@ -1,4 +1,5 @@
 <div class="detail-container">
+
   <div *ngIf="loading" class="loading">Loading restaurant details...</div>
 
   <div *ngIf="error" class="error-message">{{ error }}</div>
@@ -6,7 +7,8 @@
   <ng-container *ngIf="restaurant">
     <div class="detail-header">
       <h2>{{ restaurant.name }}</h2>
-      <a [routerLink]="['/restaurants', restaurantId, 'edit']" class="btn">Edit Restaurant</a>
+      <!-- Edit link only visible to admin users -->
+      <a *ngIf="isAdmin" [routerLink]="['/restaurants', restaurantId, 'edit']" class="btn">Edit Restaurant</a>
     </div>
 
     <p><strong>Address:</strong> {{ restaurant.address }}</p>
@@ -17,9 +19,14 @@
 
     <div class="section">
       <h3>Menus</h3>
+      <!-- Add Menu button only visible to admin users -->
+      <button *ngIf="isAdmin" class="btn" (click)="addMenu()">Add Menu</button>
       <p *ngIf="menus.length === 0">No menus available.</p>
       <div *ngFor="let menu of menus">
-        <p><a [routerLink]="['/menus', menu.id]">{{ menu.name }}</a></p>
+        <p>
+          <!-- Navigate to the dedicated menu page to view items -->
+          <a [routerLink]="['/menus', menu.id]">{{ menu.name || '(Unnamed menu)' }}</a>
+        </p>
       </div>
     </div>
 

@@ -1,0 +1,16 @@
+<div class="form-container">
+  <h2 *ngIf="isEditMode">Edit Menu</h2>
+  <h2 *ngIf="!isEditMode">Add Menu</h2>
+
+  <div>
+    <label for="name">Menu Name</label>
+    <input id="name" name="name" [(ngModel)]="menu.name" required />
+    <p class="hint">A menu currently has a single editable field: its name.</p>
+
+    <div class="actions">
+      <button class="btn" (click)="saveMenu()" [disabled]="loading">Save</button>
+      <a class="btn" [routerLink]="isEditMode ? ['/menus', menuId] : ['/restaurants', restaurantId]">Cancel</a>
+    </div>
+  </div>
+</div>
+

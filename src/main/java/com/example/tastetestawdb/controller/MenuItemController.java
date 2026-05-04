@@ -25,7 +25,7 @@ public class MenuItemController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/add/{menuId}", method = RequestMethod.POST)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuItemDto> addMenuItem(@RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuId) {
         try {
             return ResponseEntity.status(201).body(menuItemService.addMenuItem(menuItemDto, menuId));
@@ -35,7 +35,7 @@ public class MenuItemController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/delete/{menuItemId}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<UUID> deleteMenuItem(@PathVariable UUID menuItemId) {
         try {
             return ResponseEntity.status(200).body(menuItemService.deleteMenuItem(menuItemId));
@@ -45,7 +45,7 @@ public class MenuItemController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/update/{menuItemId}", method = RequestMethod.PUT)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuItemDto> updateMenuItem(@RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuItemId) {
         try {
             return ResponseEntity.status(200).body(menuItemService.updateMenuItem(menuItemDto, menuItemId));
@@ -55,7 +55,7 @@ public class MenuItemController implements SecuredRestController {
     }
 
     @RequestMapping(path = "/get/{menuItemId}", method = RequestMethod.GET)
-    @PreAuthorize("hasAuthority('RESTAURANT_OWNER')")
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuItemDto> getMenuItem(@PathVariable UUID menuItemId) {
         try {
             return ResponseEntity.status(200).body(menuItemService.getMenuItem(menuItemId));
