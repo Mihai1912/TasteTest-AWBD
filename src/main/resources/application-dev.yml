@@ -1,0 +1,30 @@
+# =============================================================
+# Profil DEV - PostgreSQL local (rulat din docker-compose)
+# Activare: --spring.profiles.active=dev (implicit)
+# =============================================================
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none           # schema gestionata exclusiv de Flyway
+    properties:
+      hibernate:
+        default_schema: project
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    table: project_schema_version
+    baseline-version: 0
+    schemas: project
+    default-schema: project
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.web: INFO

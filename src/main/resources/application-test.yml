@@ -1,0 +1,40 @@
+# =============================================================
+# Profil TEST - H2 in-memory (pentru testare rapida si izolata)
+# Activare: --spring.profiles.active=test
+# =============================================================
+spring:
+  datasource:
+    # MODE=PostgreSQL: H2 accepta sintaxa PostgreSQL
+    # DB_CLOSE_DELAY=-1: BD ramane in memorie cat traieste JVM-ul
+    # INIT=CREATE SCHEMA: schema "project" e creata automat la pornire
+    url: "jdbc:h2:mem:tastetest_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS PROJECT"
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop    # H2 isi genereaza schema din entitati la fiecare pornire
+    properties:
+      hibernate:
+        default_schema: project
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false             # migratiile PostgreSQL nu sunt rulate pe H2
+  h2:
+    console:
+      enabled: true            # consola web H2 disponibila la /h2-console
+      path: /h2-console
+
+server:
+  port: 8091                   # port diferit fata de dev pentru a evita conflictul
+
+# Pe profilul de test dezactivam JWT-ul si auth-ul ca sa avem acces la /h2-console
+# si testele de context sa nu necesite token.
+vars:
+  security:
+    enable: false
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.web: INFO

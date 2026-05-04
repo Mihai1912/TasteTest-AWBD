@@ -46,6 +46,8 @@ public class SecurityConfiguration {
         } else {
             http.authorizeHttpRequests(auth -> auth
                     .anyRequest().permitAll());
+            // Permite afisarea consolei H2 (foloseste iframe-uri)
+            http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
         }
         return http.build();
     }
