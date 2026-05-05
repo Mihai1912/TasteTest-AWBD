@@ -5,6 +5,10 @@ import com.example.tastetestawdb.service.dto.ReviewDto;
 import com.example.tastetestawdb.service.dto.ReviewIdDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
@@ -74,6 +78,19 @@ public class ReviewController implements SecuredRestController {
         try {
             return ResponseEntity.status(200).body(reviewService.getRestaurantReviews(restaurantId));
         } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/getRestaurantReviews/{restaurantId}/paged", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN') or hasAuthority('RESTAURANT_OWNER')")
+    public ResponseEntity<Page<ReviewIdDto>> getRestaurantReviewsPaged(
+            @PathVariable UUID restaurantId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        try {
+            return ResponseEntity.status(200).body(reviewService.getRestaurantReviews(restaurantId, pageable));
+        } catch (Exception e) {
+            log.error("Error getting paged reviews", e);
             return ResponseEntity.status(400).body(null);
         }
     }

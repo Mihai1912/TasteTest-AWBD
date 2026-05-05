@@ -5,6 +5,10 @@ import com.example.tastetestawdb.service.dto.MenuItemDto;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +77,19 @@ public class MenuItemController implements SecuredRestController {
             logger.info("Menu items retrieved successfully for menu ID: {}", menuId);
             return ResponseEntity.status(200).body(menuItems);
         } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/get-by-menu/{menuId}/paged", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<Page<MenuItemDto>> getMenuItemsByMenuPaged(
+            @PathVariable UUID menuId,
+            @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        try {
+            return ResponseEntity.status(200).body(menuItemService.getMenuItemsByMenu(menuId, pageable));
+        } catch (Exception e) {
+            logger.error("Error getting paged menu items", e);
             return ResponseEntity.status(400).body(null);
         }
     }

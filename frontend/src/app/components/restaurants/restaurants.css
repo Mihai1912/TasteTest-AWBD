@@ -45,12 +45,6 @@
   background-color: #f0f4ff;
 }
 
-.loading {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-}
-
 .restaurants-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -90,4 +84,80 @@
 
 .restaurant-card a:hover {
   text-decoration: underline;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 1rem;
+  background: #f7f8fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 6px;
+}
+
+.controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.controls select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccd;
+  border-radius: 4px;
+  background: white;
+}
+
+.dir-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dir-btn:hover {
+  background: #f0f4ff;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button:not(:disabled):hover {
+  background: #f0f4ff;
+}
+
+.page-info {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.page-info small {
+  color: #888;
+  margin-left: 0.25rem;
 }

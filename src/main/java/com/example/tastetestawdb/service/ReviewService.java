@@ -11,6 +11,8 @@ import com.example.tastetestawdb.service.dto.ReviewIdDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -116,6 +118,17 @@ public class ReviewService {
                     return new ReviewIdDto(review.getComment(), review.getRating(), user.getUsername(), review.getCreatedAt(), review.getId());
                 })
                 .collect(Collectors.toList());
+    }
+
+    public Page<ReviewIdDto> getRestaurantReviews(UUID restaurantId, Pageable pageable) {
+        checkRestaurant(restaurantId);
+        return reviewRepository.findByRestaurantId(restaurantId, pageable)
+                .map(review -> {
+                    User user = userRepository.findUserById(review.getUserId())
+                            .orElseThrow(() -> new RuntimeException("User not found in the database"));
+                    return new ReviewIdDto(review.getComment(), review.getRating(),
+                            user.getUsername(), review.getCreatedAt(), review.getId());
+                });
     }
 
     private Restaurant checkRestaurant(UUID restaurantId) {

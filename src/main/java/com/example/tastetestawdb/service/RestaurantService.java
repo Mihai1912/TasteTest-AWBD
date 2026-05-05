@@ -11,6 +11,8 @@ import com.example.tastetestawdb.service.dto.RestaurantDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -92,6 +94,17 @@ public class RestaurantService {
                 restaurant.getWebsite(),
                 restaurant.getSchedule()
         )).toList();
+    }
+
+    public Page<RestaurantDto> getAllRestaurants(Pageable pageable) {
+        return restaurantRepository.findAll(pageable).map(restaurant -> new RestaurantDto(
+                restaurant.getId(),
+                restaurant.getName(),
+                restaurant.getAddress(),
+                restaurant.getPhone(),
+                restaurant.getWebsite(),
+                restaurant.getSchedule()
+        ));
     }
 
     public double getRatings(UUID id) {

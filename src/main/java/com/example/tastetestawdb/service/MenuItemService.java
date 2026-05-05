@@ -13,6 +13,8 @@ import com.example.tastetestawdb.service.dto.MenuItemDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -131,5 +133,16 @@ public class MenuItemService {
         return menuItems.get().stream()
                 .map(menuItem -> new MenuItemDto(menuItem.getId().toString(), menuItem.getMenuId().toString(), menuItem.getName(), menuItem.getPrice(), menuItem.getDescription()))
                 .collect(Collectors.toList());
+    }
+
+    public Page<MenuItemDto> getMenuItemsByMenu(UUID menuId, Pageable pageable) {
+        checkMenu(menuId);
+        return menuItemRepository.findByMenuId(menuId, pageable)
+                .map(menuItem -> new MenuItemDto(
+                        menuItem.getId().toString(),
+                        menuItem.getMenuId().toString(),
+                        menuItem.getName(),
+                        menuItem.getPrice(),
+                        menuItem.getDescription()));
     }
 }

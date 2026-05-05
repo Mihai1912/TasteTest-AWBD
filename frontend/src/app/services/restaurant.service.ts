@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RestaurantDto } from '../models/restaurant.model';
+import { Page, PageRequest } from '../models/page.model';
 import { ApiService } from './api.service';
 
 @Injectable({
@@ -27,6 +28,14 @@ export class RestaurantService {
 
   getAllRestaurants(): Observable<RestaurantDto[]> {
     return this.apiService.get<RestaurantDto[]>('/restaurant/getAll');
+  }
+
+  getRestaurantsPaged(request: PageRequest = {}): Observable<Page<RestaurantDto>> {
+    const params: Record<string, string | number> = {};
+    if (request.page !== undefined) params['page'] = request.page;
+    if (request.size !== undefined) params['size'] = request.size;
+    if (request.sort) params['sort'] = request.sort;
+    return this.apiService.get<Page<RestaurantDto>>('/restaurant/paged', params);
   }
 
   getRatings(id: string): Observable<number> {

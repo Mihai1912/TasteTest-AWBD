@@ -4,6 +4,10 @@ import com.example.tastetestawdb.service.RestaurantService;
 import com.example.tastetestawdb.service.dto.RestaurantDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +73,18 @@ public class RestaurantController implements SecuredRestController{
         try {
             return ResponseEntity.status(200).body(restaurantService.getAllRestaurants());
         } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/paged", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<Page<RestaurantDto>> getAllRestaurantsPaged(
+            @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        try {
+            return ResponseEntity.status(200).body(restaurantService.getAllRestaurants(pageable));
+        } catch (Exception e) {
+            logger.error("Error getting paged restaurants", e);
             return ResponseEntity.status(400).body(null);
         }
     }

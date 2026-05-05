@@ -9,19 +9,46 @@
     <button [class.active]="activeTab === 'topRated'" (click)="activeTab = 'topRated'">Top Rated</button>
   </div>
 
-  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="activeTab === 'all'" class="controls">
+    <label>
+      Sort by:
+      <select [(ngModel)]="sortField" (change)="onSortChange()">
+        <option *ngFor="let f of sortFields" [value]="f">{{ f }}</option>
+      </select>
+    </label>
+    <button type="button" class="dir-btn" (click)="toggleSortDir()">
+      {{ sortDir === 'asc' ? '↑ Asc' : '↓ Desc' }}
+    </button>
+    <label>
+      Per page:
+      <select [(ngModel)]="size" (change)="onSizeChange()">
+        <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
+      </select>
+    </label>
+  </div>
 
-  <div *ngIf="!loading && activeTab === 'all'" class="restaurants-grid">
-    <div *ngFor="let restaurant of restaurants" class="restaurant-card" [routerLink]="['/restaurants', restaurant.id]">
-      <h3>{{ restaurant.name }}</h3>
-      <p><strong>Address:</strong> {{ restaurant.address }}</p>
-      <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-      <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
-      <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+  <div *ngIf="activeTab === 'all'">
+    <div class="restaurants-grid">
+      <div *ngFor="let restaurant of restaurants" class="restaurant-card" [routerLink]="['/restaurants', restaurant.id]">
+        <h3>{{ restaurant.name }}</h3>
+        <p><strong>Address:</strong> {{ restaurant.address }}</p>
+        <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
+        <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
+        <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+      </div>
+    </div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button type="button" (click)="prevPage()" [disabled]="first">Previous</button>
+      <span class="page-info">
+        Page {{ page + 1 }} of {{ totalPages }}
+        <small>({{ totalElements }} total)</small>
+      </span>
+      <button type="button" (click)="nextPage()" [disabled]="last">Next</button>
     </div>
   </div>
 
-  <div *ngIf="!loading && activeTab === 'topRated'" class="restaurants-grid">
+  <div *ngIf="activeTab === 'topRated'" class="restaurants-grid">
     <div *ngFor="let restaurant of topRated" class="restaurant-card" [routerLink]="['/restaurants', restaurant.id]">
       <h3>{{ restaurant.name }}</h3>
       <p><strong>Address:</strong> {{ restaurant.address }}</p>

@@ -1,64 +1,100 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RestaurantService } from '../../services/restaurant.service';
 import { RestaurantDto } from '../../models/restaurant.model';
-import { environment } from '../../../environments/environment';
+
+type SortField = 'name' | 'address' | 'phone';
+type SortDir = 'asc' | 'desc';
 
 @Component({
   selector: 'app-restaurants',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './restaurants.html',
   styleUrls: ['./restaurants.css'],
 })
 export class Restaurants implements OnInit {
   restaurants: RestaurantDto[] = [];
   topRated: RestaurantDto[] = [];
-  loading = false;
   activeTab: 'all' | 'topRated' = 'all';
+
+  page = 0;
+  size = 10;
+  sortField: SortField = 'name';
+  sortDir: SortDir = 'asc';
+  totalPages = 0;
+  totalElements = 0;
+  first = true;
+  last = true;
+
+  readonly pageSizeOptions = [5, 10, 20, 50];
+  readonly sortFields: SortField[] = ['name', 'address', 'phone'];
 
   constructor(private restaurantService: RestaurantService) {}
 
   ngOnInit() {
-    this.log('Component initialized');
     this.loadRestaurants();
-  }
-
-  loadRestaurants() {
-    this.loading = true;
-    this.log('Loading restaurants and top-rated lists');
-    this.restaurantService.getAllRestaurants().subscribe(
-      (data) => {
-        this.restaurants = data;
-        this.loading = false;
-        this.log('Loaded restaurants', { count: data.length });
-      },
-      (error) => {
-        this.error('Error loading restaurants', error);
-        this.loading = false;
-      }
-    );
     this.loadTopRated();
   }
 
+  loadRestaurants() {
+    this.restaurantService
+      .getRestaurantsPaged({
+        page: this.page,
+        size: this.size,
+        sort: `${this.sortField},${this.sortDir}`,
+      })
+      .subscribe({
+        next: (data) => {
+          this.restaurants = data.content;
+          this.totalPages = data.totalPages;
+          this.totalElements = data.totalElements;
+          this.first = data.first;
+          this.last = data.last;
+        },
+        error: (error) => {
+          console.error('[Restaurants] Error loading restaurants', error);
+        },
+      });
+  }
+
   loadTopRated() {
-    this.restaurantService.getTopRatedRestaurants().subscribe(
-      (data) => {
-        this.topRated = data;
-        this.log('Loaded top-rated restaurants', { count: data.length });
-      },
-      (error) => {
-        this.error('Error loading top rated restaurants', error);
-      }
-    );
+    this.restaurantService.getTopRatedRestaurants().subscribe({
+      next: (data) => (this.topRated = data),
+      error: (error) =>
+        console.error('[Restaurants] Error loading top rated restaurants', error),
+    });
   }
 
-  private log(message: string, data?: unknown): void {
-    console.debug(`[Restaurants] ${message}`, data ?? '');
+  onSortChange() {
+    this.page = 0;
+    this.loadRestaurants();
   }
 
-  private error(message: string, data?: unknown): void {
-    console.error(`[Restaurants] ${message}`, data ?? '');
+  onSizeChange() {
+    this.page = 0;
+    this.loadRestaurants();
+  }
+
+  toggleSortDir() {
+    this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    this.page = 0;
+    this.loadRestaurants();
+  }
+
+  goToPage(target: number) {
+    if (target < 0 || target >= this.totalPages || target === this.page) return;
+    this.page = target;
+    this.loadRestaurants();
+  }
+
+  prevPage() {
+    if (!this.first) this.goToPage(this.page - 1);
+  }
+
+  nextPage() {
+    if (!this.last) this.goToPage(this.page + 1);
   }
 }

@@ -9,6 +9,8 @@ import com.example.tastetestawdb.entity.User;
 import com.example.tastetestawdb.service.dto.MenuDto;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -115,5 +117,10 @@ public class MenuService {
         return menus.stream()
                 .map(menu -> new MenuDto(menu.getName(), menu.getId()))
                 .collect(Collectors.toList());
+    }
+
+    public Page<MenuDto> getRestaurantMenus(UUID restaurantId, Pageable pageable) {
+        return menuRepository.findByRestaurantId(restaurantId, pageable)
+                .map(menu -> new MenuDto(menu.getName(), menu.getId()));
     }
 }

@@ -3,6 +3,10 @@ package com.example.tastetestawdb.controller;
 import com.example.tastetestawdb.service.MenuService;
 import com.example.tastetestawdb.service.dto.MenuDto;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -66,6 +70,18 @@ public class MenuController implements SecuredRestController {
     public ResponseEntity<List<MenuDto>> getRestaurantMenus(@PathVariable UUID restaurantId) {
         try {
             return ResponseEntity.status(200).body(menuService.getRestaurantMenus(restaurantId));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(null);
+        }
+    }
+
+    @RequestMapping(path = "/getRestaurantMenus/{restaurantId}/paged", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
+    public ResponseEntity<Page<MenuDto>> getRestaurantMenusPaged(
+            @PathVariable UUID restaurantId,
+            @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        try {
+            return ResponseEntity.status(200).body(menuService.getRestaurantMenus(restaurantId, pageable));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(null);
         }
