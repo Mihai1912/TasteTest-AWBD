@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 import { RestaurantService } from '../../services/restaurant.service';
 import { RestaurantDto } from '../../models/restaurant.model';
 
@@ -32,7 +33,10 @@ export class Restaurants implements OnInit {
   readonly pageSizeOptions = [5, 10, 20, 50];
   readonly sortFields: SortField[] = ['name', 'address', 'phone'];
 
-  constructor(private restaurantService: RestaurantService) {}
+  constructor(
+    private restaurantService: RestaurantService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadRestaurants();
@@ -53,6 +57,7 @@ export class Restaurants implements OnInit {
           this.totalElements = data.totalElements;
           this.first = data.first;
           this.last = data.last;
+          try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
         },
         error: (error) => {
           console.error('[Restaurants] Error loading restaurants', error);
@@ -62,7 +67,10 @@ export class Restaurants implements OnInit {
 
   loadTopRated() {
     this.restaurantService.getTopRatedRestaurants().subscribe({
-      next: (data) => (this.topRated = data),
+      next: (data) => {
+        this.topRated = data;
+        try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
+      },
       error: (error) =>
         console.error('[Restaurants] Error loading top rated restaurants', error),
     });

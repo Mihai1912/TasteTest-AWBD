@@ -1,13 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RestaurantService } from '../../services/restaurant.service';
 import { ReviewService } from '../../services/review.service';
+import { ReplyService } from '../../services/reply.service';
 import { MenuService } from '../../services/menu.service';
 import { AuthService } from '../../services/auth.service';
 import { RestaurantDto } from '../../models/restaurant.model';
 import { ReviewIdDto } from '../../models/review.model';
+import { ReplyDto } from '../../models/reply.model';
 import { MenuDto } from '../../models/menu.model';
 import { of } from 'rxjs';
 import { catchError, finalize, timeout } from 'rxjs/operators';
@@ -16,7 +19,7 @@ import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-restaurant-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './restaurant-detail.html',
   styleUrls: ['./restaurant-detail.css'],
 })
@@ -24,6 +27,7 @@ export class RestaurantDetail implements OnInit {
   private readonly route: ActivatedRoute;
   private readonly restaurantService: RestaurantService;
   private readonly reviewService: ReviewService;
+  private readonly replyService: ReplyService;
   private readonly menuService: MenuService;
   private readonly authService: AuthService;
   private readonly cdr: ChangeDetectorRef;
@@ -31,6 +35,11 @@ export class RestaurantDetail implements OnInit {
 
   restaurant: RestaurantDto | null = null;
   reviews: ReviewIdDto[] = [];
+  repliesMap: Record<string, ReplyDto[]> = {};
+  replyDrafts: Record<string, string> = {};
+  replyLoading: Record<string, boolean> = {};
+  replySubmitting: Record<string, boolean> = {};
+  replyErrors: Record<string, string> = {};
   menus: MenuDto[] = [];
   // no longer embed menu items here; menus link to a dedicated menu page
   rating: number = 0;
@@ -42,6 +51,7 @@ export class RestaurantDetail implements OnInit {
     route: ActivatedRoute,
     restaurantService: RestaurantService,
     reviewService: ReviewService,
+    replyService: ReplyService,
     menuService: MenuService,
     authService: AuthService,
     cdr: ChangeDetectorRef,
@@ -50,6 +60,7 @@ export class RestaurantDetail implements OnInit {
     this.route = route;
     this.restaurantService = restaurantService;
     this.reviewService = reviewService;
+    this.replyService = replyService;
     this.menuService = menuService;
     this.authService = authService;
     this.cdr = cdr;
@@ -148,6 +159,63 @@ export class RestaurantDetail implements OnInit {
       this.reviews = reviews;
       try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
       this.log('Loaded restaurant reviews', { count: reviews.length });
+      reviews.forEach((review) => {
+        if (review.id) {
+          this.loadReplies(review.id);
+        }
+      });
+    });
+  }
+
+  loadReplies(reviewId: string) {
+    this.replyLoading[reviewId] = true;
+    this.replyErrors[reviewId] = '';
+    this.log('Loading replies for review', { reviewId });
+
+    this.replyService.getAllRepliesOfReview(reviewId).pipe(
+      timeout(8000),
+      catchError((err) => {
+        this.errorLog('Failed to load replies', { reviewId, err });
+        this.replyErrors[reviewId] = 'Could not load replies.';
+        return of([] as ReplyDto[]);
+      }),
+      finalize(() => {
+        this.replyLoading[reviewId] = false;
+        try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
+      })
+    ).subscribe((replies) => {
+      this.repliesMap[reviewId] = replies;
+      try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
+      this.log('Loaded replies for review', { reviewId, count: replies.length });
+    });
+  }
+
+  submitReply(reviewId: string) {
+    const text = (this.replyDrafts[reviewId] || '').trim();
+    if (!text) {
+      this.replyErrors[reviewId] = 'Reply text is required.';
+      return;
+    }
+
+    this.replySubmitting[reviewId] = true;
+    this.replyErrors[reviewId] = '';
+    this.replyService.addReply(reviewId, { text }).pipe(
+      timeout(8000),
+      catchError((err) => {
+        this.errorLog('Failed to add reply', { reviewId, err });
+        this.replyErrors[reviewId] = err?.status === 401
+          ? 'Your session has expired. Please login again.'
+          : 'Could not submit reply.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.replySubmitting[reviewId] = false;
+        try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
+      })
+    ).subscribe((reply) => {
+      if (!reply) return;
+      this.replyDrafts[reviewId] = '';
+      this.loadReplies(reviewId);
     });
   }
 

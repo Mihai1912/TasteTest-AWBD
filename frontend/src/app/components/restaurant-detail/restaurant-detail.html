@@ -36,7 +36,32 @@
       <p *ngIf="reviews.length === 0">No reviews yet.</p>
       <div *ngFor="let review of reviews" class="review">
         <p><strong>{{ review.urserName }}</strong> - Rating: {{ review.rating }}/5</p>
+        <p *ngIf="review.createdAt"><small>{{ review.createdAt }}</small></p>
         <p>{{ review.comment }}</p>
+
+        <div class="replies-section" *ngIf="review.id">
+          <h4>Replies</h4>
+          <div *ngIf="replyLoading[review.id]">Loading replies...</div>
+          <div *ngIf="replyErrors[review.id]" class="error-message">{{ replyErrors[review.id] }}</div>
+          <p *ngIf="!replyLoading[review.id] && (!repliesMap[review.id] || repliesMap[review.id].length === 0)">No replies yet.</p>
+
+          <div *ngFor="let reply of repliesMap[review.id] || []" class="reply">
+            <p>{{ reply.text }}</p>
+          </div>
+
+          <div class="reply-form">
+            <label for="reply-{{ review.id }}">Add a reply</label>
+            <textarea
+              id="reply-{{ review.id }}"
+              [(ngModel)]="replyDrafts[review.id]"
+              name="reply-{{ review.id }}"
+              placeholder="Write a reply..."
+            ></textarea>
+            <button type="button" (click)="submitReply(review.id)" [disabled]="replySubmitting[review.id]">
+              {{ replySubmitting[review.id] ? 'Sending...' : 'Send Reply' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </ng-container>
