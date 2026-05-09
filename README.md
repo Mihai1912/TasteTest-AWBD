@@ -53,7 +53,7 @@ Mai jos este schema bazei de date (ERM/ERD) folosită de aplicație.
 - **Java 21** (proiectul folosește features moderne)
 - **Maven Wrapper** (`./mvnw`) — inclus în proiect, nu necesită instalare separată
 - **Docker + Docker Compose** — pentru a rula PostgreSQL local (profilul `dev`)
-- **Node.js 18+** și **npm** — pentru frontend (Angular)
+- **Node.js 20.19+** și **npm** — pentru frontend (Angular); scripturile din `frontend/package.json` pornesc automat Angular CLI prin `npx` dacă ai o versiune mai veche instalată local
 
 ---
 
