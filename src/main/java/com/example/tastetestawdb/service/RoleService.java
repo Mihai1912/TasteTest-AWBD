@@ -34,4 +34,10 @@ public class RoleService {
             })
             .toList();
     }
+
+    public List<String> getAllRoles() {
+        return roleRepository.findAll().stream()
+                .map(Role::getName)
+                .toList();
+    }
 }

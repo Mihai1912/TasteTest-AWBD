@@ -6,7 +6,15 @@ import { ApiService } from './api.service';
   providedIn: 'root'
 })
 export class RoleService {
-  constructor(private apiService: ApiService) {}
+  private readonly apiService: ApiService;
+
+  constructor(apiService: ApiService) {
+    this.apiService = apiService;
+  }
+
+  getRoles(): Observable<string[]> {
+    return this.apiService.get<string[]>('/role/all');
+  }
 
   addRoles(roles: string[]): Observable<string[]> {
     return this.apiService.post<string[]>('/role/add', roles);
