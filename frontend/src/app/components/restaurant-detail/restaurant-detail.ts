@@ -37,8 +37,12 @@ export class RestaurantDetail implements OnInit {
   reviews: ReviewIdDto[] = [];
   repliesMap: Record<string, ReplyDto[]> = {};
   replyDrafts: Record<string, string> = {};
+  replyEditDrafts: Record<string, string> = {};
+  replyEditing: Record<string, boolean> = {};
   replyLoading: Record<string, boolean> = {};
   replySubmitting: Record<string, boolean> = {};
+  replyUpdateSubmitting: Record<string, boolean> = {};
+  replyDeleteSubmitting: Record<string, boolean> = {};
   replyErrors: Record<string, string> = {};
   menus: MenuDto[] = [];
   // no longer embed menu items here; menus link to a dedicated menu page
@@ -86,6 +90,18 @@ export class RestaurantDetail implements OnInit {
     } catch (e) {
       return false;
     }
+  }
+
+  get isOwner(): boolean {
+    try {
+      return this.authService.hasRole('RESTAURANT_OWNER');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  get canManageReplies(): boolean {
+    return this.isAdmin || this.isOwner;
   }
 
   loadRestaurant() {
@@ -217,6 +233,80 @@ export class RestaurantDetail implements OnInit {
       this.replyDrafts[reviewId] = '';
       this.loadReplies(reviewId);
     });
+  }
+
+  startReplyEdit(reply: ReplyDto) {
+    if (!reply.id) return;
+    this.replyEditDrafts[reply.id] = reply.text;
+    this.replyEditing[reply.id] = true;
+    this.replyErrors[this.getReplyReviewKey(reply)] = '';
+  }
+
+  cancelReplyEdit(reply: ReplyDto) {
+    if (!reply.id) return;
+    this.replyEditing[reply.id] = false;
+    delete this.replyEditDrafts[reply.id];
+  }
+
+  saveReply(reviewId: string, reply: ReplyDto) {
+    if (!reply.id) return;
+    const text = (this.replyEditDrafts[reply.id] || '').trim();
+    if (!text) {
+      this.replyErrors[reviewId] = 'Reply text is required.';
+      return;
+    }
+
+    this.replyUpdateSubmitting[reply.id] = true;
+    this.replyErrors[reviewId] = '';
+    this.replyService.updateReply(reply.id, { text }).pipe(
+      timeout(8000),
+      catchError((err) => {
+        this.errorLog('Failed to update reply', { reviewId, replyId: reply.id, err });
+        this.replyErrors[reviewId] = err?.status === 401
+          ? 'Your session has expired. Please login again.'
+          : 'Could not update reply.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.replyUpdateSubmitting[reply.id!] = false;
+        try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
+      })
+    ).subscribe((updated) => {
+      if (!updated) return;
+      this.replyEditing[reply.id!] = false;
+      this.loadReplies(reviewId);
+    });
+  }
+
+  deleteReply(reviewId: string, reply: ReplyDto) {
+    if (!reply.id) return;
+    if (!confirm('Delete this reply?')) return;
+
+    this.replyDeleteSubmitting[reply.id] = true;
+    this.replyErrors[reviewId] = '';
+    this.replyService.deleteReply(reply.id).pipe(
+      timeout(8000),
+      catchError((err) => {
+        this.errorLog('Failed to delete reply', { reviewId, replyId: reply.id, err });
+        this.replyErrors[reviewId] = err?.status === 401
+          ? 'Your session has expired. Please login again.'
+          : 'Could not delete reply.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.replyDeleteSubmitting[reply.id!] = false;
+        try { this.cdr.detectChanges(); } catch(e) { /* noop */ }
+      })
+    ).subscribe((deleted) => {
+      if (!deleted) return;
+      this.loadReplies(reviewId);
+    });
+  }
+
+  private getReplyReviewKey(reply: ReplyDto): string {
+    return Object.keys(this.repliesMap).find((reviewId) =>
+      (this.repliesMap[reviewId] || []).some((item) => item.id === reply.id)
+    ) || '';
   }
 
   loadMenus() {

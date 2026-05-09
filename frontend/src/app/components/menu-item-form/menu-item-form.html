@@ -2,7 +2,8 @@
   <h2 *ngIf="isEditMode">Edit Menu Item</h2>
   <h2 *ngIf="!isEditMode">Add Menu Item</h2>
 
-  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="loading" class="loading">Loading...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
 
   <div *ngIf="!loading">
     <label for="name">Name</label>

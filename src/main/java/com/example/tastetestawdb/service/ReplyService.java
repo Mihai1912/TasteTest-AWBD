@@ -10,9 +10,11 @@ import com.example.tastetestawdb.repository.ReviewRepository;
 import com.example.tastetestawdb.repository.UserRepository;
 import com.example.tastetestawdb.service.dto.ReplyDto;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,41 +41,50 @@ public class ReplyService {
         Review review = checkReview(reviewId);
         Reply reply = new Reply();
         reply.setText(replyDto.getText());
+        reply.setCreatedAt(LocalDateTime.now());
         reply.setReviewId(review.getId());
         reply.setRestaurantId(review.getRestaurantId());
 
-        replyRepository.save(reply);
+        Reply saved = replyRepository.save(reply);
 
-        return replyDto;
+        return toDto(saved);
     }
 
     public UUID deleteReply(UUID replyId) {
         Reply reply = checkReply(replyId);
-        checkReplyOwner(replyId);
+        checkReplyOwner(reply);
         replyRepository.delete(reply);
         return replyId;
     }
 
     public ReplyDto updateReply(UUID replyId, ReplyDto replyDto) {
         Reply reply = checkReply(replyId);
-        checkReplyOwner(replyId);
+        checkReplyOwner(reply);
         reply.setText(replyDto.getText());
-        replyRepository.save(reply);
-        return replyDto;
+        Reply saved = replyRepository.save(reply);
+        return toDto(saved);
     }
 
     public List<ReplyDto> getAllRepliesOfReview(UUID reviewId) {
         Review review = checkReview(reviewId);
         List<Reply> replies = replyRepository.findAllByReviewId(review.getId());
-        return replies.stream().map(reply -> new ReplyDto(reply.getText())).toList();
+        return replies.stream().map(this::toDto).toList();
     }
 
     public ReplyDto getReply(UUID replyId) {
-        return new ReplyDto(checkReply(replyId).getText());
+        return toDto(checkReply(replyId));
     }
 
-    private Restaurant checkRestaurant(String restaurantName) {
-        Optional<Restaurant> restaurant = restaurantRepository.findRestaurantByName(restaurantName);
+    private ReplyDto toDto(Reply reply) {
+        ReplyDto dto = new ReplyDto();
+        dto.setId(reply.getId());
+        dto.setText(reply.getText());
+        dto.setCreatedAt(reply.getCreatedAt());
+        return dto;
+    }
+
+    private Restaurant checkRestaurantById(UUID restaurantId) {
+        Optional<Restaurant> restaurant = restaurantRepository.findRestaurantById(restaurantId);
         if (restaurant.isEmpty()) {
             throw new RuntimeException("Restaurant not found");
         }
@@ -96,11 +107,22 @@ public class ReplyService {
         return reply.get();
     }
 
-    private void checkReplyOwner(UUID replyId) {
-        Reply reply = checkReply(replyId);
-        Optional<User> user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
-        if (!reply.getRestaurantId().equals(user.get().getId())) {
+    private void checkReplyOwner(Reply reply) {
+        if (isAdmin()) {
+            return;
+        }
+
+        Restaurant restaurant = checkRestaurantById(reply.getRestaurantId());
+        User user = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!restaurant.getOwnerId().equals(user.getId())) {
             throw new RuntimeException("You are not the owner of this reply");
         }
+    }
+
+    private boolean isAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch("ADMIN"::equals);
     }
 }

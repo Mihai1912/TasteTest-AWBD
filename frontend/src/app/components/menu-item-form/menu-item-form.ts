@@ -5,6 +5,9 @@ import { MenuItemService } from '../../services/menu-item.service';
 import { MenuItemDto } from '../../models/menu-item.model';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { catchError, finalize, timeout } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-menu-item-form',
@@ -14,18 +17,32 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./menu-item-form.css'],
 })
 export class MenuItemForm implements OnInit {
+  private readonly menuItemService: MenuItemService;
+  private readonly route: ActivatedRoute;
+  private readonly router: Router;
+  private readonly authService: AuthService;
+  private readonly cdr: ChangeDetectorRef;
+
   item: MenuItemDto = { name: '', price: 0, description: '' };
   isEditMode = false;
   menuItemId: string = '';
   menuId: string = '';
   loading = false;
+  error: string | null = null;
 
   constructor(
-    private menuItemService: MenuItemService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private authService: AuthService
-  ) {}
+    menuItemService: MenuItemService,
+    route: ActivatedRoute,
+    router: Router,
+    authService: AuthService,
+    cdr: ChangeDetectorRef
+  ) {
+    this.menuItemService = menuItemService;
+    this.route = route;
+    this.router = router;
+    this.authService = authService;
+    this.cdr = cdr;
+  }
 
   ngOnInit() {
     // Ensure owner or admin role
@@ -48,32 +65,72 @@ export class MenuItemForm implements OnInit {
 
   loadItem() {
     this.loading = true;
-    this.menuItemService.getMenuItem(this.menuItemId).subscribe((data) => {
+    this.error = null;
+    this.menuItemService.getMenuItem(this.menuItemId).pipe(
+      timeout(8000),
+      catchError((err) => {
+        console.error('[MenuItemForm] Failed to load item', err);
+        this.error = err?.status === 401
+          ? 'Your session has expired. Please login again.'
+          : err?.status === 404
+            ? 'Menu item not found.'
+            : 'Could not load menu item.';
+        return of(null);
+      }),
+      finalize(() => {
+        this.loading = false;
+        try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
+      })
+    ).subscribe((data) => {
+      if (!data) return;
       this.item = data;
-      this.loading = false;
-    }, (err) => {
-      console.error('[MenuItemForm] Failed to load item', err);
-      this.loading = false;
+      if (data.menuId) {
+        this.menuId = data.menuId;
+      }
+      try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
     });
   }
 
   save() {
     this.loading = true;
+    this.error = null;
     if (this.isEditMode) {
-      this.menuItemService.updateMenuItem(this.menuItemId, this.item).subscribe(() => {
-        // after update navigate back to the containing menu
-        const targetMenu = (this.item as any).menuId || this.menuId;
+      this.menuItemService.updateMenuItem(this.menuItemId, this.item).pipe(
+        timeout(8000),
+        catchError((err) => {
+          console.error('[MenuItemForm] Failed to update', err);
+          this.error = err?.status === 401
+            ? 'Your session has expired. Please login again.'
+            : 'Could not update menu item.';
+          return of(null);
+        }),
+        finalize(() => {
+          this.loading = false;
+          try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
+        })
+      ).subscribe((updated) => {
+        if (!updated) return;
+        const targetMenu = updated.menuId || this.item.menuId || this.menuId;
         this.router.navigate(['/menus', targetMenu]);
-      }, (err) => {
-        console.error('[MenuItemForm] Failed to update', err);
-        this.loading = false;
       });
     } else {
-      this.menuItemService.addMenuItem(this.menuId, this.item).subscribe(() => {
-        this.router.navigate(['/menus', this.menuId]);
-      }, (err) => {
-        console.error('[MenuItemForm] Failed to add', err);
-        this.loading = false;
+      this.menuItemService.addMenuItem(this.menuId, this.item).pipe(
+        timeout(8000),
+        catchError((err) => {
+          console.error('[MenuItemForm] Failed to add', err);
+          this.error = err?.status === 401
+            ? 'Your session has expired. Please login again.'
+            : 'Could not add menu item.';
+          return of(null);
+        }),
+        finalize(() => {
+          this.loading = false;
+          try { this.cdr.detectChanges(); } catch (e) { /* noop */ }
+        })
+      ).subscribe((created) => {
+        if (!created) return;
+        const targetMenu = created.menuId || this.menuId;
+        this.router.navigate(['/menus', targetMenu]);
       });
     }
   }

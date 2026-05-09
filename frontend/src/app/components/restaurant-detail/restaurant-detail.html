@@ -46,10 +46,32 @@
           <p *ngIf="!replyLoading[review.id] && (!repliesMap[review.id] || repliesMap[review.id].length === 0)">No replies yet.</p>
 
           <div *ngFor="let reply of repliesMap[review.id] || []" class="reply">
-            <p>{{ reply.text }}</p>
+            <ng-container *ngIf="reply.id && replyEditing[reply.id]; else replyView">
+              <textarea
+                [(ngModel)]="replyEditDrafts[reply.id]"
+                name="reply-edit-{{ reply.id }}"
+              ></textarea>
+              <div class="reply-actions">
+                <button type="button" (click)="saveReply(review.id, reply)" [disabled]="replyUpdateSubmitting[reply.id]">
+                  {{ replyUpdateSubmitting[reply.id] ? 'Saving...' : 'Save' }}
+                </button>
+                <button type="button" class="secondary-btn" (click)="cancelReplyEdit(reply)">Cancel</button>
+              </div>
+            </ng-container>
+
+            <ng-template #replyView>
+              <p>{{ reply.text }}</p>
+              <p *ngIf="reply.createdAt"><small>{{ reply.createdAt }}</small></p>
+              <div class="reply-actions" *ngIf="canManageReplies && reply.id">
+                <button type="button" (click)="startReplyEdit(reply)">Edit</button>
+                <button type="button" class="secondary-btn" (click)="deleteReply(review.id, reply)" [disabled]="replyDeleteSubmitting[reply.id]">
+                  {{ replyDeleteSubmitting[reply.id] ? 'Deleting...' : 'Delete' }}
+                </button>
+              </div>
+            </ng-template>
           </div>
 
-          <div class="reply-form">
+          <div class="reply-form" *ngIf="canManageReplies">
             <label for="reply-{{ review.id }}">Add a reply</label>
             <textarea
               id="reply-{{ review.id }}"
