@@ -1,8 +1,9 @@
-# =============================================================
-# Profil DEV - PostgreSQL local (rulat din docker-compose)
-# Activare: --spring.profiles.active=dev (implicit)
-# =============================================================
 spring:
+  datasource:
+    url: jdbc:postgresql://tastetest-app-db:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none           # schema gestionata exclusiv de Flyway

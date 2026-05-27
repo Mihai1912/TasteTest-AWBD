@@ -1,8 +1,13 @@
 spring:
   application:
-    name: TasteTest-AWDB
+    name: tastetest-awdb
   profiles:
     active: dev   # profilul implicit; poate fi suprascris cu -Dspring.profiles.active=test
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  cloud:
+    config:
+      enabled: true
   jpa:
     show-sql: true
     open-in-view: false
@@ -16,8 +21,8 @@ spring:
   mail:
     host: smtp.mailtrap.io
     port: 2525
-    username: 443ee0f39ecc46
-    password: 4734721f935fed
+    username: ${MAIL_USERNAME:mailtrap-user}
+    password: ${MAIL_PASSWORD:mailtrap-password}
     properties:
       mail:
         smtp:
@@ -26,17 +31,17 @@ spring:
             enable: true
 
 server:
-  port: 8090
+  port: ${SERVER_PORT:8090}
 
 vars:
   security:
-    enable: true
+    enable: ${VARS_SECURITY_ENABLE:true}
 
 token:
-  ttl: 3600000
-  secret: "https://www.youtube.com/watch?v=VBUMYOYJISc"
+  ttl: ${TOKEN_TTL:3600000}
+  secret: ${TOKEN_SECRET:change-me-local-dev-secret-change-me-local-dev-secret}
 
 admin:
-  username: admin
-  email: admin@admin.com
-  password: admin
+  username: ${ADMIN_USERNAME:admin}
+  email: ${ADMIN_EMAIL:admin@admin.com}
+  password: ${ADMIN_PASSWORD:admin}

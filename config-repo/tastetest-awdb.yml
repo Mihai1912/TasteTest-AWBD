@@ -1,0 +1,19 @@
+token:
+  ttl: 3600000
+  secret: tastetest-awdb-dev-secret-tastetest-awdb-dev-secret-tastetest
+
+admin:
+  username: admin
+  email: admin@admin.com
+  password: admin
+
+vars:
+  security:
+    enable: true
+
+spring:
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    username: 443ee0f39ecc46
+    password: 4734721f935fed

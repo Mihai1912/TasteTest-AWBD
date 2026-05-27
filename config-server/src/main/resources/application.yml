@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: tastetest-config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:${CONFIG_REPO_PATH:../config-repo}
+
+server:
+  port: ${CONFIG_SERVER_PORT:8888}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

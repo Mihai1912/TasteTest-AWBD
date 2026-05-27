@@ -77,6 +77,33 @@ src/main/resources/
 
 ---
 
+## Configurare centralizată cu Config Server
+
+Pentru scenariul opțional de microservicii, backend-ul citește acum configurația dintr-un **Spring Cloud Config Server** local, separat de aplicația principală.
+
+Structura folosită în repo:
+
+```
+config-server/   # serviciul Spring Cloud Config Server
+config-repo/     # fișierele de configurare centralizată
+```
+
+Ce este externalizat:
+
+- `token.secret` și `token.ttl`
+- credențialele inițiale de admin
+- setările `spring.datasource` și `spring.flyway` pentru profilul `dev`
+- credentialele de mail
+
+Refresh dinamic:
+
+- după modificarea unui fișier din `config-repo/`, poți forța reîncărcarea la runtime cu `POST /actuator/refresh`
+- beans care consumă aceste valori sunt marcate cu `@RefreshScope`
+
+Config Server rulează pe `http://localhost:8888` și este pornit automat prin `docker compose up --build`.
+
+---
+
 ## Pași de utilizare
 
 ### 1. Clonarea proiectului
@@ -166,15 +193,22 @@ Testele JUnit folosesc **automat profilul `test`** (datorită adnotării `@Activ
 
 ### 6. Rulare cu Docker Compose (toate serviciile)
 
-Pornește backend + frontend + PostgreSQL împreună:
+Pornește Config Server + backend + frontend + PostgreSQL împreună:
 
 ```bash
 docker compose up --build
 ```
 
 - Backend (profil `dev`): `http://localhost:8090`
+- Config Server: `http://localhost:8888`
 - Frontend Angular: `http://localhost:4200`
 - PostgreSQL: `localhost:5432`
+
+Pentru refresh manual al configurației backend-ului:
+
+```bash
+curl -X POST http://localhost:8090/actuator/refresh
+```
 
 Pentru oprire:
 
