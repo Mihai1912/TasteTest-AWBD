@@ -3,6 +3,9 @@
 # Activare: --spring.profiles.active=test
 # =============================================================
 spring:
+  cloud:
+    config:
+      enabled: false
   datasource:
     # MODE=PostgreSQL: H2 accepta sintaxa PostgreSQL
     # DB_CLOSE_DELAY=-1: BD ramane in memorie cat traieste JVM-ul
@@ -32,6 +35,15 @@ server:
 vars:
   security:
     enable: false
+
+token:
+  ttl: 3600000
+  secret: test-secret-test-secret-test-secret-test-secret
+
+admin:
+  username: admin
+  email: admin@admin.com
+  password: admin
 
 logging:
   level:

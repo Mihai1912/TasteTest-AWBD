@@ -1,10 +1,16 @@
 package com.example.tastetestawdb.service.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LoginDto {
+    @NotBlank(message = "Email-ul este obligatoriu")
+    @Email(message = "Email-ul nu este valid")
     private String email;
+
+    @NotBlank(message = "Parola este obligatorie")
     private String password;
 
     public String getEmail() {

@@ -2,14 +2,15 @@ package com.example.tastetestawdb.controller;
 
 import com.example.tastetestawdb.service.AuthService;
 import com.example.tastetestawdb.service.EmailService;
+import com.example.tastetestawdb.config.TokenProperties;
 import com.example.tastetestawdb.service.dto.LoginDto;
 import com.example.tastetestawdb.service.dto.LoginResponseDto;
 import com.example.tastetestawdb.service.dto.RegisterDto;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,13 +30,13 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
-    @Value("${token.ttl}")
-    private long tokenTtl;
+    @Autowired
+    private TokenProperties tokenProperties;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @RequestMapping(path ="/register", method = RequestMethod.POST)
-    public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterDto registerDto) {
         logger.info("Request to register user {}", registerDto.getEmail());
         authService.register(registerDto);
 //        emailService.sendEmail(registerDto.getEmail(), "Registration", "You have successfully registered");
@@ -44,11 +45,11 @@ public class AuthController {
     }
 
     @RequestMapping(path ="/login", method = RequestMethod.POST)
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginDto) {
         logger.info("Request to login for user {}", loginDto.getEmail());
         String token = authService.login(loginDto);
         logger.info("Successfully logged in user {}", loginDto.getEmail());
-        return new ResponseEntity<>(new LoginResponseDto(token, "Bearer", tokenTtl), HttpStatus.OK);
+        return new ResponseEntity<>(new LoginResponseDto(token, "Bearer", tokenProperties.getTtl()), HttpStatus.OK);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
