@@ -1,12 +1,24 @@
 package com.example.tastetestawdb.service.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import java.util.UUID;
 
 public class RestaurantDto {
     private UUID id;
+
+    @NotBlank(message = "Numele restaurantului este obligatoriu")
+    @Size(max = 150, message = "Numele poate avea maximum 150 de caractere")
     private String name;
+
+    @NotBlank(message = "Adresa este obligatorie")
     private String address;
+
+    @NotBlank(message = "Numarul de telefon este obligatoriu")
+    @Size(max = 30, message = "Numarul de telefon poate avea maximum 30 de caractere")
     private String phone;
+
     private String website;
     private String schedule;
 

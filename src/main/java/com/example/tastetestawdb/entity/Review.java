@@ -25,6 +25,11 @@ public class Review {
     @Column(name = "restaurant_id")
     private UUID restaurantId;
 
+    // @ManyToOne: mai multe recenzii apartin unui restaurant (read-only peste restaurant_id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
+    private Restaurant restaurant;
+
     public Review(UUID id, int rating, String comment, LocalDateTime createdAt, UUID userId, UUID restaurantId) {
         this.id = id;
         this.rating = rating;
@@ -89,5 +94,9 @@ public class Review {
     public Review setRestaurantId(UUID restaurantId) {
         this.restaurantId = restaurantId;
         return this;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 }

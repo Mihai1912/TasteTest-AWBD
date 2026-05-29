@@ -3,12 +3,14 @@ package com.example.tastetestawdb.controller;
 import com.example.tastetestawdb.service.MenuService;
 import com.example.tastetestawdb.service.dto.MenuDto;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/menus")
+@Validated
 public class MenuController implements SecuredRestController {
     public final MenuService menuService;
 
@@ -25,8 +28,8 @@ public class MenuController implements SecuredRestController {
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
-    public ResponseEntity<MenuDto> addMenu(@RequestParam String name,
-                                           @RequestParam String restaurantName) {
+    public ResponseEntity<MenuDto> addMenu(@RequestParam @NotBlank String name,
+                                           @RequestParam @NotBlank String restaurantName) {
         try {
             return ResponseEntity.status(201).body(menuService.addMenu(name, restaurantName));
         } catch (Exception e) {
@@ -47,7 +50,7 @@ public class MenuController implements SecuredRestController {
     @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
     public ResponseEntity<MenuDto> updateMenu(@PathVariable UUID id,
-                                              @RequestParam String name) {
+                                              @RequestParam @NotBlank String name) {
         try {
             return ResponseEntity.status(200).body(menuService.updateMenu(id, name));
         } catch (Exception e) {

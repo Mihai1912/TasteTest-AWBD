@@ -2,6 +2,7 @@ package com.example.tastetestawdb.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,6 +25,28 @@ public class Restaurant {
     private String schedule;
     @Column(name = "owner_id")
     private UUID ownerId;
+
+    // ---------------------------------------------------------------------
+    // Relatii JPA (adaugate aditiv, read-only, peste coloanele FK existente).
+    // Campurile UUID de mai sus raman sursa de adevar pentru scriere, astfel
+    // incat API-ul si logica existenta nu se modifica.
+    // ---------------------------------------------------------------------
+
+    // @OneToMany: un restaurant are mai multe meniuri (inversul lui Menu.restaurant)
+    @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
+    private List<Menu> menus;
+
+    // @OneToMany: un restaurant are mai multe recenzii (inversul lui Review.restaurant)
+    @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
+    private List<Review> reviews;
+
+    // @ManyToMany: un restaurant poate avea mai multe categorii, iar o categorie
+    // poate apartine mai multor restaurante (tabela de jonctiune restaurant_categories)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "restaurant_categories", schema = "project",
+            joinColumns = @JoinColumn(name = "restaurant_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    private List<Category> categories;
 
     public Restaurant(UUID id, String name, String address, String phone, String website, String schedule, UUID ownerId) {
         this.id = id;
@@ -92,5 +115,21 @@ public class Restaurant {
 
     public void setOwnerId(UUID ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public List<Menu> getMenus() {
+        return menus;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public List<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
     }
 }

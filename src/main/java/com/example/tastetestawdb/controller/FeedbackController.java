@@ -3,6 +3,7 @@ package com.example.tastetestawdb.controller;
 import com.example.tastetestawdb.service.FeedbackService;
 import com.example.tastetestawdb.service.dto.FeedbackAdminDto;
 import com.example.tastetestawdb.service.dto.FeedbackDto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class FeedbackController implements SecuredRestController{
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN') or hasAuthority('RESTAURANT_OWNER')")
-    public ResponseEntity<FeedbackDto> addFeedback(@RequestBody FeedbackDto feedbackDto) {
+    public ResponseEntity<FeedbackDto> addFeedback(@Valid @RequestBody FeedbackDto feedbackDto) {
         try {
             return ResponseEntity.status(201).body(feedbackService.addFeedback(feedbackDto.getFeedbackType(), feedbackDto.getExperience(), feedbackDto.getComment()));
         } catch (Exception e) {

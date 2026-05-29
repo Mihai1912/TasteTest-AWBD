@@ -21,6 +21,11 @@ public class MenuItem {
     @Column(name = "menu_id")
     private UUID menuId;
 
+    // @ManyToOne: mai multe articole apartin unui meniu (read-only peste menu_id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_id", insertable = false, updatable = false)
+    private Menu menu;
+
     public MenuItem(UUID id, String name, BigDecimal price, String description, UUID menuId) {
         this.id = id;
         this.name = name;
@@ -70,5 +75,9 @@ public class MenuItem {
 
     public void setMenuId(UUID menuId) {
         this.menuId = menuId;
+    }
+
+    public Menu getMenu() {
+        return menu;
     }
 }

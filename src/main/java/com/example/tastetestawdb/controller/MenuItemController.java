@@ -3,6 +3,7 @@ package com.example.tastetestawdb.controller;
 import com.example.tastetestawdb.service.MenuItemService;
 import com.example.tastetestawdb.service.dto.MenuItemDto;
 
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ public class MenuItemController implements SecuredRestController {
 
     @RequestMapping(path = "/add/{menuId}", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
-    public ResponseEntity<MenuItemDto> addMenuItem(@RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuId) {
+    public ResponseEntity<MenuItemDto> addMenuItem(@Valid @RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuId) {
         try {
             return ResponseEntity.status(201).body(menuItemService.addMenuItem(menuItemDto, menuId));
         } catch (Exception e) {
@@ -50,7 +51,7 @@ public class MenuItemController implements SecuredRestController {
 
     @RequestMapping(path = "/update/{menuItemId}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
-    public ResponseEntity<MenuItemDto> updateMenuItem(@RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuItemId) {
+    public ResponseEntity<MenuItemDto> updateMenuItem(@Valid @RequestBody MenuItemDto menuItemDto, @PathVariable UUID menuItemId) {
         try {
             return ResponseEntity.status(200).body(menuItemService.updateMenuItem(menuItemDto, menuItemId));
         } catch (Exception e) {

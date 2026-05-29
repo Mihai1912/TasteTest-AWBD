@@ -3,6 +3,9 @@ package com.example.tastetestawdb.controller;
 import com.example.tastetestawdb.service.ReviewService;
 import com.example.tastetestawdb.service.dto.ReviewDto;
 import com.example.tastetestawdb.service.dto.ReviewIdDto;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -12,6 +15,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/review")
+@Validated
 public class ReviewController implements SecuredRestController {
     private final ReviewService reviewService;
 
@@ -30,9 +35,9 @@ public class ReviewController implements SecuredRestController {
 
     @RequestMapping(path = "/add/{restaurantId}", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN') or hasAuthority('RESTAURANT_OWNER')")
-    public ResponseEntity<ReviewDto> addReview(@RequestBody ReviewDto reviewDto,
+    public ResponseEntity<ReviewDto> addReview(@Valid @RequestBody ReviewDto reviewDto,
                                                @PathVariable UUID restaurantId,
-                                               @RequestParam int rating) {
+                                               @RequestParam @Min(1) @Max(5) int rating) {
         try {
             return ResponseEntity.status(201).body(reviewService.addReview(reviewDto, restaurantId, rating));
         } catch (Exception e) {
@@ -53,7 +58,7 @@ public class ReviewController implements SecuredRestController {
     @RequestMapping(path = "/update/{reviewId}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN') or hasAuthority('RESTAURANT_OWNER')")
     public ResponseEntity<ReviewDto> updateReview(@PathVariable UUID reviewId,
-                                                  @RequestBody ReviewDto reviewDto) {
+                                                  @Valid @RequestBody ReviewDto reviewDto) {
         try {
             return ResponseEntity.status(200).body(reviewService.updateReview(reviewId, reviewDto));
         } catch (Exception e) {

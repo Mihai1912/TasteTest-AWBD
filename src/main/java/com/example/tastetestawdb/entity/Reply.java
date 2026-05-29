@@ -23,6 +23,16 @@ public class Reply {
     @Column(name = "restaurant_id")
     private UUID restaurantId;
 
+    // @OneToOne: un raspuns este asociat unei singure recenzii (read-only peste review_id)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id", insertable = false, updatable = false)
+    private Review review;
+
+    // @ManyToOne: mai multe raspunsuri apartin unui restaurant (read-only peste restaurant_id)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", insertable = false, updatable = false)
+    private Restaurant restaurant;
+
     public Reply(UUID id, String text, LocalDateTime createdAt, UUID reviewId, UUID restaurantId) {
         this.id = id;
         this.text = text;
@@ -72,5 +82,13 @@ public class Reply {
 
     public void setRestaurantId(UUID restaurantId) {
         this.restaurantId = restaurantId;
+    }
+
+    public Review getReview() {
+        return review;
+    }
+
+    public Restaurant getRestaurant() {
+        return restaurant;
     }
 }

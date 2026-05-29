@@ -2,6 +2,7 @@ package com.example.tastetestawdb.controller;
 
 import com.example.tastetestawdb.service.RestaurantService;
 import com.example.tastetestawdb.service.dto.RestaurantDto;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class RestaurantController implements SecuredRestController{
 
     @RequestMapping(path = "/add", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
-    public ResponseEntity<RestaurantDto> addRestaurant(@RequestBody RestaurantDto restaurantDto) {
+    public ResponseEntity<RestaurantDto> addRestaurant(@Valid @RequestBody RestaurantDto restaurantDto) {
         try {
             return ResponseEntity.status(201).body(restaurantService.addRestaurant(restaurantDto));
         } catch (Exception e) {
@@ -49,7 +50,7 @@ public class RestaurantController implements SecuredRestController{
 
     @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('ADMIN')")
-    public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable UUID id, @RequestBody RestaurantDto restaurantDto) {
+    public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable UUID id, @Valid @RequestBody RestaurantDto restaurantDto) {
         try {
             return ResponseEntity.status(200).body(restaurantService.updateRestaurant(id, restaurantDto));
         } catch (Exception e) {

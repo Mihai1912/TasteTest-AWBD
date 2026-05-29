@@ -1,12 +1,25 @@
 package com.example.tastetestawdb.service.dto;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 
 public class MenuItemDto {
     private String id;
     private String menuId;
+
+    @NotBlank(message = "Numele articolului este obligatoriu")
+    @Size(max = 150, message = "Numele poate avea maximum 150 de caractere")
     private String name;
+
+    @NotNull(message = "Pretul este obligatoriu")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Pretul nu poate fi negativ")
     private BigDecimal price;
+
+    @Size(max = 500, message = "Descrierea poate avea maximum 500 de caractere")
     private String description;
 
     public MenuItemDto(String id, String menuId, String name, BigDecimal price, String description) {

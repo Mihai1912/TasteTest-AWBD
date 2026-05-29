@@ -2,6 +2,7 @@ package com.example.tastetestawdb.controller;
 
 import com.example.tastetestawdb.service.ReplyService;
 import com.example.tastetestawdb.service.dto.ReplyDto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class ReplyController implements SecuredRestController {
 
     @RequestMapping(path = "/add/{reviewId}", method = RequestMethod.POST)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<ReplyDto> addReply(@RequestBody ReplyDto replyDto,
+    public ResponseEntity<ReplyDto> addReply(@Valid @RequestBody ReplyDto replyDto,
                                              @PathVariable UUID reviewId) {
         try {
             return ResponseEntity.status(201).body(replyService.addReply(replyDto, reviewId));
@@ -41,7 +42,7 @@ public class ReplyController implements SecuredRestController {
 
     @RequestMapping(path = "/update/{id}", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('RESTAURANT_OWNER') or hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<ReplyDto> updateReply(@PathVariable UUID id, @RequestBody ReplyDto replyDto) {
+    public ResponseEntity<ReplyDto> updateReply(@PathVariable UUID id, @Valid @RequestBody ReplyDto replyDto) {
         try {
             return ResponseEntity.status(200).body(replyService.updateReply(id, replyDto));
         } catch (Exception e) {
