@@ -11,6 +11,7 @@ import { MenuForm } from './components/menu-form/menu-form';
 import { MenuItemForm } from './components/menu-item-form/menu-item-form';
 import { FeedbackForm } from './components/feedback-form/feedback-form';
 import { Admin } from './components/admin/admin';
+import { NotFound } from './components/not-found/not-found';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -30,4 +31,6 @@ export const routes: Routes = [
   { path: 'restaurants/:restaurantId/menus/add', component: MenuForm, canActivate: [AuthGuard] },
   { path: 'feedback', component: FeedbackForm, canActivate: [AuthGuard] },
   { path: 'admin', component: Admin, canActivate: [AuthGuard] },
+  { path: '404', component: NotFound },
+  { path: '**', component: NotFound },
 ];
