@@ -1,0 +1,51 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  - job_name: discovery-server
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - discovery-server:8761
+
+  - job_name: config-server
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - config-server:8888
+
+  - job_name: backend-original
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - backend-original:8090
+
+  - job_name: auth-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - auth:8091
+
+  - job_name: user-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - users:8092
+
+  - job_name: restaurant-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - restaurants:8093
+
+  - job_name: notification-service
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+          - notification-service:8082

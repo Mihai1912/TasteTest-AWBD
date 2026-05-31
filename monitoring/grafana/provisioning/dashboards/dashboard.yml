@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: tasteTest
+    orgId: 1
+    folder: TasteTest
+    type: file
+    disableDeletion: false
+    editable: false
+    options:
+      path: /var/lib/grafana/dashboards

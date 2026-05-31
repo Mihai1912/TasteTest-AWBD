@@ -7,6 +7,11 @@ services:
       SERVER_PORT: 8761
     ports:
       - 8761:8761
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
   config-server:
     build:
@@ -145,6 +150,47 @@ services:
       - backend-original
     ports:
       - 8090:80
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+    depends_on:
+      - config-server
+      - discovery-server
+      - auth
+      - users
+      - restaurants
+      - backend-original
+      - notification-service
+    ports:
+      - 9090:9090
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/tastetest-observability.json
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+  zipkin:
+    image: openzipkin/zipkin:2.24.3
+    ports:
+      - 9411:9411
     
   backend-original:
     build:
@@ -168,18 +214,29 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
     # backend-original is internal; api-gateway exposes the public port 8090
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8090/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
   notification-service:
     build:
       context: ./notification-service
       dockerfile: Dockerfile
     depends_on:
-      - discovery-server
+      discovery-server:
+        condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SERVER_PORT: 8082
     ports:
       - 8082:8082
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
   frontend:
     build:
@@ -192,3 +249,5 @@ services:
 
 volumes:
   tastetest-app-db-vol:
+  prometheus-data:
+  grafana-data:

@@ -36,7 +36,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
         if (securityEnabled) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                    .requestMatchers("/actuator/**", "/api/v1/auth/login", "/api/v1/auth/register", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated())
                 .exceptionHandling((exception)-> exception.authenticationEntryPoint(authEntryPoint))

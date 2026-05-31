@@ -227,7 +227,7 @@ Testele JUnit folosesc **automat profilul `test`** (datorită adnotării `@Activ
 
 ### 6. Rulare cu Docker Compose (toate serviciile)
 
-Pornește Discovery Server + Config Server + backend + Notification Service + frontend + PostgreSQL împreună:
+Pornește Discovery Server + Config Server + backend + Notification Service + frontend + PostgreSQL împreună, plus stack-ul de monitorizare (Prometheus, Grafana și Zipkin):
 
 ```bash
 docker compose up --build
@@ -239,6 +239,18 @@ docker compose up --build
 - Notification Service: `http://localhost:8082`
 - Frontend Angular: `http://localhost:4200`
 - PostgreSQL: `localhost:5432`
+- Prometheus: `http://localhost:9090`
+- Grafana: `http://localhost:3000` (admin/admin)
+- Zipkin: `http://localhost:9411`
+
+Endpoint-uri utile pentru observability:
+
+- health: `/actuator/health`
+- metrics: `/actuator/metrics`
+- Prometheus scrape: `/actuator/prometheus`
+- refresh config: `POST /actuator/refresh`
+
+Grafana vine cu un dashboard preconfigurat pentru CPU, memorie și request rate, alimentat din Prometheus.
 
 Pentru refresh manual al configurației backend-ului:
 
