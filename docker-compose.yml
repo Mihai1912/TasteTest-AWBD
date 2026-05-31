@@ -1,4 +1,13 @@
 services:
+  discovery-server:
+    build:
+      context: ./discovery-server
+      dockerfile: Dockerfile
+    environment:
+      SERVER_PORT: 8761
+    ports:
+      - 8761:8761
+
   config-server:
     build:
       context: ./config-server
@@ -6,8 +15,11 @@ services:
     environment:
       CONFIG_REPO_PATH: /config-repo
       CONFIG_SERVER_PORT: 8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
     volumes:
       - ./config-repo:/config-repo:ro
+    depends_on:
+      - discovery-server
     ports:
       - 8888:8888
     healthcheck:
@@ -139,6 +151,8 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_started
       config-server:
         condition: service_healthy
       tastetest-app-db:
@@ -146,6 +160,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SERVER_PORT: 8090
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_DATASOURCE_URL: jdbc:postgresql://tastetest-app-db:5432/postgres
@@ -153,6 +168,18 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
     # backend-original is internal; api-gateway exposes the public port 8090
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    depends_on:
+      - discovery-server
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SERVER_PORT: 8082
+    ports:
+      - 8082:8082
 
   frontend:
     build:

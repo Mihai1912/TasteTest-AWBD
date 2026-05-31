@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>tastetest-config-server</artifactId>
+    <artifactId>tastetest-discovery-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>tastetest-config-server</name>
-    <description>TasteTest Config Server</description>
+    <name>tastetest-discovery-server</name>
+    <description>TasteTest Eureka Discovery Server</description>
 
     <properties>
         <java.version>21</java.version>
@@ -45,11 +45,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

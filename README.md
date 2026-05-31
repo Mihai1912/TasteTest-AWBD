@@ -104,6 +104,40 @@ Config Server rulează pe `http://localhost:8888` și este pornit automat prin `
 
 ---
 
+## Service discovery și comunicare inter-servicii
+
+Pentru cerința de microservicii am adăugat:
+
+- **Eureka Discovery Server** la `http://localhost:8761`
+- **Notification Service** la `http://localhost:8082`
+- **Feign Client** în backend pentru apel REST între servicii
+
+Servicii înregistrate în registry:
+
+- `tastetest-awdb`
+- `tastetest-config-server`
+- `tastetest-notification-service`
+- `tastetest-discovery-server` este registry-ul care le descoperă automat
+
+Endpoint demo în backend:
+
+```http
+POST /api/v1/integrations/notifications/demo
+```
+
+Exemplu body:
+
+```json
+{
+  "title": "Test",
+  "message": "Salut din backend"
+}
+```
+
+Răspunsul vine de la Notification Service prin Eureka + Feign.
+
+---
+
 ## Pași de utilizare
 
 ### 1. Clonarea proiectului
@@ -193,14 +227,16 @@ Testele JUnit folosesc **automat profilul `test`** (datorită adnotării `@Activ
 
 ### 6. Rulare cu Docker Compose (toate serviciile)
 
-Pornește Config Server + backend + frontend + PostgreSQL împreună:
+Pornește Discovery Server + Config Server + backend + Notification Service + frontend + PostgreSQL împreună:
 
 ```bash
 docker compose up --build
 ```
 
+- Discovery Server: `http://localhost:8761`
 - Backend (profil `dev`): `http://localhost:8090`
 - Config Server: `http://localhost:8888`
+- Notification Service: `http://localhost:8082`
 - Frontend Angular: `http://localhost:4200`
 - PostgreSQL: `localhost:5432`
 

@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>tastetest-config-server</artifactId>
+    <artifactId>tastetest-notification-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>tastetest-config-server</name>
-    <description>TasteTest Config Server</description>
+    <name>tastetest-notification-service</name>
+    <description>TasteTest Notification Service</description>
 
     <properties>
         <java.version>21</java.version>
@@ -45,11 +45,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-server</artifactId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: tastetest-awdb
   datasource:
     url: jdbc:postgresql://tastetest-app-db:5432/postgres
     username: postgres
@@ -19,6 +21,13 @@ spring:
     baseline-version: 0
     schemas: project
     default-schema: project
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
 
 logging:
   level:
