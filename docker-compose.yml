@@ -54,6 +54,8 @@ services:
       context: .
       dockerfile: auth-service/Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_healthy
       config-server:
         condition: service_healthy
       tastetest-app-db:
@@ -64,6 +66,7 @@ services:
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_APPLICATION_NAME: tastetest-auth
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       # rely on Flyway migrations; do not use hibernate ddl-auto in containers
       SPRING_DATASOURCE_URL: jdbc:postgresql://tastetest-app-db:5432/postgres
       SPRING_DATASOURCE_USERNAME: postgres
@@ -84,6 +87,8 @@ services:
       context: .
       dockerfile: user-service/Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_healthy
       config-server:
         condition: service_healthy
       tastetest-app-db:
@@ -94,6 +99,7 @@ services:
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_APPLICATION_NAME: tastetest-user
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       # rely on Flyway migrations; do not use hibernate ddl-auto in containers
       SPRING_DATASOURCE_URL: jdbc:postgresql://tastetest-app-db:5432/postgres
       SPRING_DATASOURCE_USERNAME: postgres
@@ -114,6 +120,8 @@ services:
       context: .
       dockerfile: restaurant-service/Dockerfile
     depends_on:
+      discovery-server:
+        condition: service_healthy
       config-server:
         condition: service_healthy
       tastetest-app-db:
@@ -124,6 +132,7 @@ services:
       SPRING_CONFIG_IMPORT: "optional:configserver:"
       SPRING_APPLICATION_NAME: tastetest-restaurant
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       # rely on Flyway migrations; do not use hibernate ddl-auto in containers
       SPRING_DATASOURCE_URL: jdbc:postgresql://tastetest-app-db:5432/postgres
       SPRING_DATASOURCE_USERNAME: postgres
@@ -141,15 +150,34 @@ services:
 
   api-gateway:
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-gateway/Dockerfile
     depends_on:
-      - auth
-      - users
-      - restaurants
-      - backend-original
+      discovery-server:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      users:
+        condition: service_healthy
+      restaurants:
+        condition: service_healthy
+      backend-original:
+        condition: service_healthy
+    environment:
+      SPRING_CONFIG_IMPORT: "optional:configserver:"
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SERVER_PORT: 80
     ports:
       - 8090:80
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL","curl -f http://localhost:80/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
   prometheus:
     image: prom/prometheus:v2.54.1

@@ -15,7 +15,7 @@ spring:
         - id: users-api
           uri: lb://tastetest-user
           predicates:
-            - Path=/api/v1/users/**
+            - Path=/api/v1/user/**
           filters:
             - AddRequestHeader=X-Gateway-Route, users-api
         - id: restaurants-api
@@ -47,6 +47,10 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
     register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:true}
     fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:true}
+    registry-fetch-interval-seconds: 5
+  instance:
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 management:
   endpoints:

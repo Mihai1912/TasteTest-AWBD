@@ -23,13 +23,11 @@ public class RequestLoggingFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String correlationId = exchange.getRequest().getHeaders()
+        String headerCorrelationId = exchange.getRequest().getHeaders()
                 .getFirst(CORRELATION_ID);
-
-        // Generate correlation ID if not present
-        if (correlationId == null || correlationId.isEmpty()) {
-            correlationId = UUID.randomUUID().toString();
-        }
+        final String correlationId = (headerCorrelationId == null || headerCorrelationId.isEmpty())
+                ? UUID.randomUUID().toString()
+                : headerCorrelationId;
 
         // Add correlation ID to MDC for logging
         MDC.put("correlationId", correlationId);
@@ -39,7 +37,7 @@ public class RequestLoggingFilter implements GlobalFilter {
 
         // Log request details
         long startTime = System.currentTimeMillis();
-        String method = exchange.getRequest().getMethodValue();
+        String method = exchange.getRequest().getMethod().name();
         String path = exchange.getRequest().getPath().value();
         String remoteAddress = exchange.getRequest().getRemoteAddress() != null ?
                 exchange.getRequest().getRemoteAddress().getAddress().getHostAddress() : "unknown";

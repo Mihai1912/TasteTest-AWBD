@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -97,6 +98,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             exchange.getRequest().getPath().value()
         );
 
-        return response.writeString(Mono.just(body));
+        DataBufferFactory bufferFactory = response.bufferFactory();
+        return response.writeWith(Mono.just(bufferFactory.wrap(body.getBytes())));
     }
 }

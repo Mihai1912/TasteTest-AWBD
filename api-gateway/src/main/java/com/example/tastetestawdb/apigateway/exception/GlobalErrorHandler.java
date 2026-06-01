@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -21,12 +22,10 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        HttpStatus status;
+        HttpStatusCode status;
         String errorMessage;
 
-        if (ex instanceof org.springframework.web.server.ResponseStatusException) {
-            org.springframework.web.server.ResponseStatusException rse =
-                    (org.springframework.web.server.ResponseStatusException) ex;
+        if (ex instanceof org.springframework.web.server.ResponseStatusException rse) {
             status = rse.getStatusCode();
             errorMessage = rse.getReason();
         } else if (ex instanceof IllegalArgumentException) {
@@ -48,12 +47,13 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         );
     }
 
-    private String buildErrorResponse(HttpStatus status, String message, ServerWebExchange exchange) {
+    private String buildErrorResponse(HttpStatusCode status, String message, ServerWebExchange exchange) {
+        String reason = (status instanceof HttpStatus hs) ? hs.getReasonPhrase() : "";
         return String.format(
             "{\"timestamp\":\"%s\",\"status\":%d,\"error\":\"%s\",\"message\":\"%s\",\"path\":\"%s\"}",
             Instant.now(),
             status.value(),
-            status.getReasonPhrase(),
+            reason,
             escapeJson(message),
             exchange.getRequest().getPath().value()
         );
