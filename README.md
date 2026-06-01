@@ -110,7 +110,7 @@ Pentru cerința de microservicii am adăugat:
 
 - **Eureka Discovery Server** la `http://localhost:8761`
 - **Notification Service** la `http://localhost:8082`
-- **Feign Client** în backend pentru apel REST între servicii
+- **Spring Cloud LoadBalancer** în backend pentru apel REST între servicii
 
 Servicii înregistrate în registry:
 
@@ -134,7 +134,9 @@ Exemplu body:
 }
 ```
 
-Răspunsul vine de la Notification Service prin Eureka + Feign.
+Răspunsul vine de la Notification Service prin Eureka + Spring Cloud LoadBalancer.
+
+Răspunsul include și `instanceId`, ca să poți vedea clar ce instanță a procesat cererea atunci când rulezi mai multe copii ale serviciului.
 
 ---
 
@@ -257,6 +259,24 @@ Pentru refresh manual al configurației backend-ului:
 ```bash
 curl -X POST http://localhost:8090/actuator/refresh
 ```
+
+### 7. Demo load balancing și scalare
+
+Pentru a rula două instanțe ale Notification Service fără conflict de porturi, folosește override-ul dedicat:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.loadbalancing.yml up --build --scale notification-service=2
+```
+
+După pornire, trimite de mai multe ori cererea demo către backend:
+
+```bash
+curl -X POST http://localhost:8090/api/v1/integrations/notifications/demo \
+   -H 'Content-Type: application/json' \
+   -d '{"title":"Test","message":"Salut"}'
+```
+
+Dacă load balancing-ul funcționează, câmpul `instanceId` din răspuns va alterna între instanțele disponibile.
 
 Pentru oprire:
 

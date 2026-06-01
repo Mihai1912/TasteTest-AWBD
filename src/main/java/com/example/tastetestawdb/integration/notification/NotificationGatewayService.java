@@ -1,18 +1,23 @@
 package com.example.tastetestawdb.integration.notification;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URI;
 
 @Service
 public class NotificationGatewayService {
 
-    private final NotificationServiceClient notificationServiceClient;
+    private static final URI NOTIFICATION_SERVICE_URI = URI.create("http://tastetest-notification-service/api/notifications");
 
-    public NotificationGatewayService(NotificationServiceClient notificationServiceClient) {
-        this.notificationServiceClient = notificationServiceClient;
+    private final RestTemplate restTemplate;
+
+    public NotificationGatewayService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     public NotificationResponse sendDemoNotification(String title, String message) {
         NotificationRequest request = new NotificationRequest(title, message, "tastetest-awdb");
-        return notificationServiceClient.publish(request);
+        return restTemplate.postForObject(NOTIFICATION_SERVICE_URI, request, NotificationResponse.class);
     }
 }

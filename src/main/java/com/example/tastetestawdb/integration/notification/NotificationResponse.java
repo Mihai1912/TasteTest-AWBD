@@ -6,6 +6,7 @@ public class NotificationResponse {
 
     private String status;
     private String serviceName;
+    private String instanceId;
     private String message;
     private Instant processedAt;
 
@@ -23,6 +24,14 @@ public class NotificationResponse {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     public String getMessage() {

@@ -15,9 +15,13 @@ import java.time.Instant;
 public class NotificationController {
 
     private final String serviceName;
+    private final String instanceId;
 
-    public NotificationController(@Value("${spring.application.name}") String serviceName) {
+    public NotificationController(@Value("${spring.application.name}") String serviceName,
+                                  @Value("${HOSTNAME:unknown}") String hostname,
+                                  @Value("${server.port}") String serverPort) {
         this.serviceName = serviceName;
+        this.instanceId = "unknown".equals(hostname) ? serviceName + ":" + serverPort : hostname + ":" + serverPort;
     }
 
     @PostMapping
@@ -25,6 +29,7 @@ public class NotificationController {
         NotificationResponse response = new NotificationResponse(
                 "DELIVERED",
                 serviceName,
+            instanceId,
                 request.getTitle() + ": " + request.getMessage(),
                 Instant.now()
         );

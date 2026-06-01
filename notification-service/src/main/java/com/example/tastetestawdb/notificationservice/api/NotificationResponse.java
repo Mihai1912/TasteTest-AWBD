@@ -6,12 +6,14 @@ public class NotificationResponse {
 
     private final String status;
     private final String serviceName;
+    private final String instanceId;
     private final String message;
     private final Instant processedAt;
 
-    public NotificationResponse(String status, String serviceName, String message, Instant processedAt) {
+    public NotificationResponse(String status, String serviceName, String instanceId, String message, Instant processedAt) {
         this.status = status;
         this.serviceName = serviceName;
+        this.instanceId = instanceId;
         this.message = message;
         this.processedAt = processedAt;
     }
@@ -22,6 +24,10 @@ public class NotificationResponse {
 
     public String getServiceName() {
         return serviceName;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 
     public String getMessage() {
