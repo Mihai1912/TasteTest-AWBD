@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: tastetest-api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - AddResponseHeader=X-Gateway, tastetest-api-gateway
+      routes:
+        - id: auth-api
+          uri: lb://tastetest-auth
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - AddRequestHeader=X-Gateway-Route, auth-api
+        - id: users-api
+          uri: lb://tastetest-user
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - AddRequestHeader=X-Gateway-Route, users-api
+        - id: restaurants-api
+          uri: lb://tastetest-restaurant
+          predicates:
+            - Path=/api/v1/restaurant/**
+          filters:
+            - AddRequestHeader=X-Gateway-Route, restaurants-api
+        - id: notifications-api
+          uri: lb://tastetest-notification-service
+          predicates:
+            - Path=/api/internal/notifications/**
+          filters:
+            - RewritePath=/api/internal/notifications/(?<segment>.*), /api/notifications/${segment}
+            - AddRequestHeader=X-Gateway-Route, notifications-api
+        - id: backend-api
+          uri: lb://tastetest-awdb
+          predicates:
+            - Path=/api/**
+          filters:
+            - AddRequestHeader=X-Gateway-Route, backend-api
+
+server:
+  port: ${SERVER_PORT:80}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:true}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

@@ -166,6 +166,7 @@
         <module>restaurant-service</module>
         <module>backend-original</module>
         <module>config-server</module>
+        <module>api-gateway</module>
     </modules>
 
     <build>
