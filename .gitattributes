@@ -1,2 +1,26 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
+# Default: treat everything as text and store with LF in the repo.
+# Working-tree checkouts also get LF, so Windows editors that follow
+# .gitattributes (most do, VS Code does via .editorconfig too) won't
+# rewrite to CRLF.
+* text=auto eol=lf
+
+# Scripts that MUST keep their native line endings:
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+*.ps1  text eol=crlf
+/mvnw  text eol=lf
+*.sh   text eol=lf
+
+# Binary blobs — never touched.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.jar   binary
+*.war   binary
+*.docx  binary
+*.xlsx  binary
+*.pptx  binary
