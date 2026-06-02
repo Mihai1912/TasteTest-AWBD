@@ -52,6 +52,30 @@ management:
 server:
   port: ${SERVER_PORT:8090}
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 2
+        permittedNumberOfCallsInHalfOpenState: 2
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+    instances:
+      notificationService:
+        baseConfig: default
+      userService:
+        baseConfig: default
+  retry:
+    instances:
+      notificationService:
+        maxAttempts: 3
+        waitDuration: 2s
+      userService:
+        maxAttempts: 3
+        waitDuration: 2s
+
 eureka:
   client:
     service-url:
