@@ -1,20 +1,14 @@
-package com.example.restaurant.config.security;
+package com.example.user.config.security;
 
+import com.example.user.config.TokenProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import com.example.restaurant.config.TokenProperties;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtGenerator {
@@ -27,25 +21,6 @@ public class JwtGenerator {
 
     private SecretKey signingKey() {
         return new SecretKeySpec(tokenProperties.getSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-    }
-
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
-
-        List<String> roles = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + tokenProperties.getTtl());
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("roles", roles)
-                .setIssuedAt(new Date())
-                .setIssuer("http://localhost:8090")
-                .setExpiration(expireDate)
-                .signWith(signingKey(), SignatureAlgorithm.HS512)
-                .compact();
     }
 
     public String getUsernameFromJWT(String token) {

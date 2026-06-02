@@ -106,6 +106,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SERVER_PORT: 8092
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: DEBUG
+      LOGGING_LEVEL_COM_EXAMPLE_USER: DEBUG
     ports:
       - 8092:8092
     restart: unless-stopped

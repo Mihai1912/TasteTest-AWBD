@@ -13,13 +13,17 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GatewayHeadersFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest().mutate()
-                .headers(headers -> headers.remove("X-Internal-Token"))
+                .headers(headers -> {
+                    headers.remove("X-Internal-Token");
+                    headers.remove("X-Auth-Email");
+                    headers.remove("X-Auth-Roles");
+                })
                 .header("X-Gateway-Request-Id", UUID.randomUUID().toString())
                 .build();
 

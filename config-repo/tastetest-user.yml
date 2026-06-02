@@ -16,3 +16,6 @@ spring:
     validate-on-migrate: false
     table: project_schema_version
     schemas: project
+vars:
+  security:
+    enable: true

@@ -5,6 +5,13 @@ spring:
 server:
   port: ${SERVER_PORT:8082}
 
+token:
+  secret: ${JWT_SECRET:tastetest-awdb-dev-secret-tastetest-awdb-dev-secret-tastetest-extended-for-hs512-min-64-bytes}
+
+vars:
+  security:
+    enable: true
+
 eureka:
   client:
     service-url:

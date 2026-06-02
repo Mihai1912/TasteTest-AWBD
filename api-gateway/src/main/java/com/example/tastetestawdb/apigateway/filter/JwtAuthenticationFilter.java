@@ -16,6 +16,8 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class JwtAuthenticationFilter implements GlobalFilter {
@@ -32,34 +34,34 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
-        // Allow CORS preflight requests to pass through
         if (request.getMethod().toString().equals("OPTIONS")) {
             return chain.filter(exchange);
         }
 
-        // Skip authentication for public endpoints
         if (isPublicEndpoint(path)) {
             return chain.filter(exchange);
         }
 
-        // Extract token from Authorization header
         String token = extractToken(request);
 
-        // If no token and it's a protected endpoint, return 401
         if (token == null) {
             logger.warn("Missing authorization token for path: {}", path);
             return onError(exchange, "Missing authorization token", HttpStatus.UNAUTHORIZED);
         }
 
-        // Validate token
         if (!tokenProvider.validateToken(token)) {
             logger.warn("Invalid or expired token for path: {}", path);
             return onError(exchange, "Invalid or expired token", HttpStatus.UNAUTHORIZED);
         }
 
-        // Token is valid, forward it to backend services
+        String email = tokenProvider.getEmailFromToken(token);
+        List<String> roles = tokenProvider.getRolesFromToken(token);
+        String rolesHeader = roles == null ? "" : String.join(",", roles);
+
         ServerHttpRequest mutatedRequest = request.mutate()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .header("X-Auth-Email", email == null ? "" : email)
+                .header("X-Auth-Roles", rolesHeader)
                 .build();
 
         ServerWebExchange mutatedExchange = exchange.mutate().request(mutatedRequest).build();
@@ -76,7 +78,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     }
 
     private boolean isPublicEndpoint(String path) {
-        // Public endpoints that don't require authentication
         return path.startsWith("/api/v1/auth/register") ||
                path.startsWith("/api/v1/auth/login") ||
                path.startsWith("/actuator/health") ||

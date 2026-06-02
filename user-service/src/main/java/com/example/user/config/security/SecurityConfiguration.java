@@ -1,10 +1,10 @@
-package com.example.restaurant.config.security;
+package com.example.user.config.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableConfigurationProperties(com.example.restaurant.config.TokenProperties.class)
+@EnableConfigurationProperties(com.example.user.config.TokenProperties.class)
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfiguration {
@@ -26,9 +26,6 @@ public class SecurityConfiguration {
     private JwtAuthEntryPoint authEntryPoint;
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
-    
-    @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -36,12 +33,12 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
         if (securityEnabled) {
             http.authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/actuator/**", "/api/v1/auth/login", "/api/v1/auth/register", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
-                    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                    .anyRequest().authenticated())
-                .exceptionHandling((exception)-> exception.authenticationEntryPoint(authEntryPoint))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(cors -> {});
+                            .requestMatchers("/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
+                            .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                            .anyRequest().authenticated())
+                    .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .cors(cors -> {});
             http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         } else {
             http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
@@ -49,6 +46,4 @@ public class SecurityConfiguration {
         }
         return http.build();
     }
-
-    
 }

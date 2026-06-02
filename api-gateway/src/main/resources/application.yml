@@ -29,7 +29,7 @@ spring:
           predicates:
             - Path=/api/internal/notifications/**
           filters:
-            - RewritePath=/api/internal/notifications/(?<segment>.*), /api/notifications/${segment}
+            - RewritePath=/api/internal/notifications(?<segment>.*), /api/notifications${segment}
             - AddRequestHeader=X-Gateway-Route, notifications-api
         - id: backend-api
           uri: lb://tastetest-awdb
@@ -62,8 +62,8 @@ management:
       probes:
         enabled: true
 
-jwt:
-  secret: ${JWT_SECRET:your-256-bit-secret-key-change-this-in-production}
+token:
+  secret: ${JWT_SECRET:tastetest-awdb-dev-secret-tastetest-awdb-dev-secret-tastetest-extended-for-hs512-min-64-bytes}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}

@@ -1,30 +1,31 @@
 package com.example.tastetestawdb.apigateway.util;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${jwt.secret:your-256-bit-secret-key-change-this-in-production}")
+    @Value("${token.secret}")
     private String jwtSecret;
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
-                    .build()
-                    .parseSignedClaims(token);
+            parseClaims(token);
             return true;
-        } catch (SecurityException e) {
+        } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
@@ -32,6 +33,8 @@ public class JwtTokenProvider {
             logger.error("Expired JWT token: {}", e.getMessage());
         } catch (UnsupportedJwtException e) {
             logger.error("Unsupported JWT token: {}", e.getMessage());
+        } catch (JwtException e) {
+            logger.error("JWT validation failed: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty: {}", e.getMessage());
         }
@@ -40,31 +43,37 @@ public class JwtTokenProvider {
 
     public String getEmailFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-            return claims.getSubject();
+            return parseClaims(token).getSubject();
         } catch (JwtException e) {
             logger.error("Error extracting email from token: {}", e.getMessage());
             return null;
         }
     }
 
-    public boolean isTokenExpired(String token) {
+    @SuppressWarnings("unchecked")
+    public List<String> getRolesFromToken(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-            return claims.getExpiration().before(new java.util.Date());
-        } catch (ExpiredJwtException e) {
-            return true;
+            Object roles = parseClaims(token).get("roles");
+            if (roles instanceof List<?>) {
+                return (List<String>) roles;
+            }
+            return Collections.emptyList();
         } catch (JwtException e) {
-            logger.error("Error checking token expiration: {}", e.getMessage());
-            return true;
+            logger.error("Error extracting roles from token: {}", e.getMessage());
+            return Collections.emptyList();
         }
+    }
+
+    private SecretKey signingKey() {
+        // Match auth-service: raw UTF-8 bytes wrapped in SecretKeySpec.
+        return new SecretKeySpec(jwtSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }
