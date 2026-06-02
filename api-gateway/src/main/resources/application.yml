@@ -31,6 +31,12 @@ spring:
           filters:
             - RewritePath=/api/internal/notifications(?<segment>.*), /api/notifications${segment}
             - AddRequestHeader=X-Gateway-Route, notifications-api
+        - id: agent-api
+          uri: lb://tastetest-agent
+          predicates:
+            - Path=/api/v1/agent/**
+          filters:
+            - AddRequestHeader=X-Gateway-Route, agent-api
         - id: backend-api
           uri: lb://tastetest-awdb
           predicates:

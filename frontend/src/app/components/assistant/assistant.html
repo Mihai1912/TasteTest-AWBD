@@ -1,0 +1,36 @@
+<div class="assistant">
+  <header class="assistant-header">
+    <h2>Ask TasteBot</h2>
+    <p class="subtitle">Your AI guide to restaurants on TasteTest. Powered by Claude, with live access to the catalog and your reviews.</p>
+  </header>
+
+  <div class="chat-window" #chatWindow>
+    <div *ngIf="turns.length === 0" class="empty-state">
+      <p>Try one of these:</p>
+      <div class="suggestions">
+        <button *ngFor="let s of suggestions" type="button" (click)="pick(s)">{{ s }}</button>
+      </div>
+    </div>
+
+    <div *ngFor="let turn of turns" class="turn turn-{{ turn.role }}">
+      <div class="turn-label">{{ turn.role === 'user' ? 'You' : turn.role === 'assistant' ? 'TasteBot' : 'Error' }}</div>
+      <div class="turn-text">{{ turn.text }}</div>
+    </div>
+
+    <div *ngIf="loading" class="turn turn-assistant">
+      <div class="turn-label">TasteBot</div>
+      <div class="turn-text typing"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <form class="composer" (ngSubmit)="send()">
+    <input type="text"
+           [(ngModel)]="draft"
+           name="message"
+           placeholder="Ask about restaurants, ratings, or your reviews…"
+           [disabled]="loading"
+           autocomplete="off"
+           maxlength="4000" />
+    <button type="submit" [disabled]="loading || !draft.trim()">Send</button>
+  </form>
+</div>

@@ -195,6 +195,7 @@ services:
       - restaurants
       - backend-original
       - notification-service
+      - agent-service
     ports:
       - 9090:9090
     volumes:
@@ -264,6 +265,29 @@ services:
       - 8082:8082
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  # AI Agent service (Part II §12). Spring AI + Anthropic Claude Haiku, exposes
+  # POST /api/v1/agent/chat through the gateway. Tools call the live restaurant /
+  # user services via load-balanced RestTemplate, propagating the caller's JWT.
+  agent-service:
+    build:
+      context: ./agent-service
+      dockerfile: Dockerfile
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      SERVER_PORT: 8083
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-dummy-please-override}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+    ports:
+      - 8083:8083
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/actuator/health || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 10

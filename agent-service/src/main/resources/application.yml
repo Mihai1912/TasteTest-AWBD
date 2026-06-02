@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: tastetest-agent
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:dummy-please-override}
+      chat:
+        options:
+          model: ${ANTHROPIC_MODEL:claude-haiku-4-5}
+          max-tokens: 1024
+          temperature: 0.4
+
+server:
+  port: ${SERVER_PORT:8083}
+
+token:
+  secret: ${JWT_SECRET:tastetest-awdb-dev-secret-tastetest-awdb-dev-secret-tastetest-extended-for-hs512-min-64-bytes}
+
+vars:
+  security:
+    enable: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_CLIENT_REGISTER_WITH_EUREKA:true}
+    fetch-registry: ${EUREKA_CLIENT_FETCH_REGISTRY:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    com.example.agent: DEBUG
+    org.springframework.ai: INFO

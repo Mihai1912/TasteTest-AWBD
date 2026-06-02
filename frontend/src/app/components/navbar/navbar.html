@@ -3,6 +3,7 @@
     <a routerLink="/home" class="logo">TasteTest</a>
     <div class="nav-links">
       <a routerLink="/restaurants">Restaurants</a>
+      <a routerLink="/assistant">Ask TasteBot</a>
       <a routerLink="/feedback">Feedback</a>
       <div class="nav-auth">
         <ng-container *ngIf="isLoggedIn$ | async; else loggedOutLinks">
