@@ -1,0 +1,167 @@
+.container, .form-container, .detail-container, .menu-container, .feedback-container, .admin-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  background-color: #667eea;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #764ba2;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #ddd;
+}
+
+.review, .item {
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #f9f9f9;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+}
+
+.message {
+  padding: 1rem;
+  margin-top: 1rem;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 4px;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.items-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.loading,
+.empty-state {
+  padding: 0.75rem 0;
+  color: #555;
+}
+
+.user-card {
+  padding: 1rem;
+  background: #f7f8fc;
+  border: 1px solid #e3e6f0;
+  border-radius: 6px;
+}
+
+.roles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f0f4ff;
+  border: 1px solid #cdd9ff;
+  border-radius: 999px;
+}
+
+.actions-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.secondary-btn {
+  background-color: #e9edf5;
+  color: #2c3e50;
+}
+
+.secondary-btn:hover {
+  background-color: #dfe5f1;
+}
+
+.role-input-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.role-input-row input {
+  flex: 1;
+}
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 0.35rem 0.75rem;
+  background: #edf1f8;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.feedback-card {
+  border-left-color: #2d7ef7;
+}
+

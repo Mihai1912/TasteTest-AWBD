@@ -1,0 +1,28 @@
+{
+  "name": "mfe-admin",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "npx -p node@20.19.0 node ./node_modules/.bin/ng",
+    "start": "npm run ng -- serve --port 4201",
+    "build": "npm run ng -- build",
+    "watch": "npm run ng -- build --watch --configuration development"
+  },
+  "private": true,
+  "packageManager": "npm@10.9.7",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.9",
+    "@angular/cli": "^21.2.9",
+    "@angular/compiler-cli": "^21.2.0",
+    "typescript": "~5.9.2"
+  }
+}

@@ -1,95 +1,12 @@
 <div class="admin-container">
-  <h2>Admin Panel</h2>
-
-  <div *ngIf="message" class="message success-message">{{ message }}</div>
-  <div *ngIf="error" class="message error-message">{{ error }}</div>
-
-  <div class="section">
-    <h3>Users & Roles</h3>
-
-    <div class="loading" *ngIf="loadingUsers || loadingRoles">Loading users and roles...</div>
-
-    <div class="form-group">
-      <label for="user-select">Select User:</label>
-      <select id="user-select" [(ngModel)]="selectedUserId" (change)="onUserChange()">
-        <option value="">-- Choose a user --</option>
-        <option *ngFor="let user of users" [value]="user.id">
-          {{ user.username }} ({{ user.email }})
-        </option>
-      </select>
-    </div>
-
-    <div *ngIf="selectedUser" class="user-card">
-      <p><strong>User ID:</strong> {{ selectedUser.id }}</p>
-      <p><strong>Username:</strong> {{ selectedUser.username }}</p>
-      <p><strong>Email:</strong> {{ selectedUser.email }}</p>
-
-      <h4>Assign Roles</h4>
-      <div class="roles-grid">
-        <label *ngFor="let role of availableRoles" class="role-chip">
-          <input type="checkbox" [checked]="selectedRoles.includes(role)" (change)="toggleSelectedRole(role)" />
-          <span>{{ role }}</span>
-        </label>
-      </div>
-
-      <div class="actions-row">
-        <button type="button" (click)="saveUserRoles()" [disabled]="savingRoles">
-          {{ savingRoles ? 'Saving...' : 'Save Roles' }}
-        </button>
-        <button type="button" class="secondary-btn" (click)="loadSelectedUserReviews()" [disabled]="loadingReviews">
-          {{ loadingReviews ? 'Loading...' : 'Load Reviews' }}
-        </button>
-      </div>
-    </div>
-
-    <div class="empty-state" *ngIf="!selectedUser && !loadingUsers">
-      Choose a user to view reviews and edit roles.
-    </div>
+  <div class="mfe-banner">
+    <strong>Admin (micro-frontend)</strong>
+    <span>embedded from <code>{{ mfeOrigin }}</code></span>
   </div>
-
-  <div class="section">
-    <h3>User Reviews</h3>
-    <div *ngIf="loadingReviews" class="loading">Loading reviews...</div>
-    <p *ngIf="!loadingReviews && userReviews.length === 0">No reviews loaded.</p>
-    <div *ngFor="let review of userReviews" class="review">
-      <p><strong>{{ review.urserName }}</strong> - {{ review.rating }}/5</p>
-      <p>{{ review.comment }}</p>
-    </div>
-  </div>
-
-  <div class="section">
-    <h3>Create Roles</h3>
-
-    <div class="loading" *ngIf="creatingRoles">Creating roles...</div>
-
-    <div *ngFor="let role of roleDrafts; let i = index" class="form-group role-input-row">
-      <input [(ngModel)]="roleDrafts[i]" type="text" placeholder="Role name" />
-      <button type="button" class="secondary-btn" (click)="removeRole(i)" [disabled]="roleDrafts.length === 1">Remove</button>
-    </div>
-
-    <div class="actions-row">
-      <button type="button" (click)="addRole(roleDrafts.length - 1)">Add Role</button>
-      <button type="button" (click)="submitRoles()" [disabled]="creatingRoles">
-        {{ creatingRoles ? 'Submitting...' : 'Submit Roles' }}
-      </button>
-    </div>
-
-    <h4>Existing Roles</h4>
-    <div class="pill-list" *ngIf="availableRoles.length > 0; else noRoles">
-      <span *ngFor="let role of availableRoles" class="pill">{{ role }}</span>
-    </div>
-    <ng-template #noRoles>
-      <p>No roles found.</p>
-    </ng-template>
-  </div>
-
-  <div class="section">
-    <h3>Feedback Inbox</h3>
-    <div class="loading" *ngIf="loadingFeedback">Loading feedback...</div>
-    <p *ngIf="!loadingFeedback && feedbackEntries.length === 0">No feedback yet.</p>
-    <div *ngFor="let feedback of feedbackEntries" class="review feedback-card">
-      <p><strong>{{ feedback.feedbackType }}</strong> - {{ feedback.experience }}</p>
-      <p>{{ feedback.comment }}</p>
-  </div>
+  <iframe
+    *ngIf="iframeUrl() as url"
+    [src]="url"
+    class="admin-mfe-frame"
+    title="Admin micro-frontend"
+  ></iframe>
 </div>
- </div>

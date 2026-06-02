@@ -274,8 +274,21 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - api-gateway
+      - mfe-admin
     ports:
       - 4200:80
+
+  # Admin micro-frontend (Part II §10).
+  # Independent Angular workspace, independent build, independent deploy;
+  # the shell embeds it at /admin via an iframe pointing at host port 4201.
+  mfe-admin:
+    build:
+      context: ./mfe-admin
+      dockerfile: Dockerfile
+    depends_on:
+      - api-gateway
+    ports:
+      - 4201:80
 
 volumes:
   tastetest-app-db-vol:

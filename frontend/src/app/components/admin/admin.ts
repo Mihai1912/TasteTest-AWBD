@@ -1,171 +1,39 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { UserService } from '../../services/user.service';
-import { RoleService } from '../../services/role.service';
-import { ReviewDto } from '../../models/review.model';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FeedbackService } from '../../services/feedback.service';
-import { FeedbackAdminDto, UserAdminDto } from '../../models/admin.model';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { environment } from '../../../environments/environment';
 
+/**
+ * Thin loader that embeds the standalone admin micro-frontend in an iframe.
+ *
+ * The admin UI itself lives in /mfe-admin - a separate Angular workspace,
+ * independently built and deployed. The shell only knows the MFE's URL and
+ * hands off the current JWT via URL fragment so the MFE can call the API
+ * gateway as the same authenticated user.
+ */
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule],
   templateUrl: './admin.html',
   styleUrls: ['./admin.css'],
 })
-export class Admin implements OnInit {
-  private readonly userService: UserService;
-  private readonly roleService: RoleService;
-  private readonly feedbackService: FeedbackService;
+export class Admin implements OnInit, OnDestroy {
+  iframeUrl = signal<SafeResourceUrl | null>(null);
+  mfeOrigin = '';
 
-  users: UserAdminDto[] = [];
-  selectedUserId: string = '';
-  selectedUser: UserAdminDto | null = null;
-  selectedRoles: string[] = [];
-  userReviews: ReviewDto[] = [];
-  roleDrafts: string[] = [''];
-  availableRoles: string[] = [];
-  feedbackEntries: FeedbackAdminDto[] = [];
-  loadingUsers = false;
-  loadingRoles = false;
-  loadingReviews = false;
-  loadingFeedback = false;
-  savingRoles = false;
-  creatingRoles = false;
-  message = '';
-  error = '';
-
-  constructor(
-    userService: UserService,
-    roleService: RoleService,
-    feedbackService: FeedbackService
-  ) {
-    this.userService = userService;
-    this.roleService = roleService;
-    this.feedbackService = feedbackService;
-  }
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit(): void {
-    this.loadUsers();
-    this.loadRoles();
-    this.loadFeedback();
+    const token = localStorage.getItem('access_token') ?? '';
+    // URL fragments never reach the server - safer than a query param for
+    // passing the JWT to the embedded MFE.
+    const url = `${environment.adminMfeUrl}/#token=${encodeURIComponent(token)}`;
+    this.mfeOrigin = environment.adminMfeUrl;
+    this.iframeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
   }
 
-  loadUsers() {
-    this.loadingUsers = true;
-    this.userService.getAllUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        if (this.selectedUserId) {
-          this.syncSelectedUser();
-        }
-      },
-      error: (error) => this.handleError('Could not load users', error),
-      complete: () => (this.loadingUsers = false),
-    });
-  }
-
-  loadRoles() {
-    this.loadingRoles = true;
-    this.roleService.getRoles().subscribe({
-      next: (roles) => {
-        this.availableRoles = roles;
-        this.syncSelectedUser();
-      },
-      error: (error) => this.handleError('Could not load roles', error),
-      complete: () => (this.loadingRoles = false),
-    });
-  }
-
-  loadFeedback() {
-    this.loadingFeedback = true;
-    this.feedbackService.getAllFeedback().subscribe({
-      next: (feedback) => (this.feedbackEntries = feedback),
-      error: (error) => this.handleError('Could not load feedback', error),
-      complete: () => (this.loadingFeedback = false),
-    });
-  }
-
-  onUserChange() {
-    this.syncSelectedUser();
-    this.userReviews = [];
-    this.message = '';
-    this.error = '';
-  }
-
-  private syncSelectedUser() {
-    this.selectedUser = this.users.find((user) => user.id === this.selectedUserId) || null;
-    this.selectedRoles = this.selectedUser?.roles ? [...this.selectedUser.roles] : [];
-  }
-
-  loadSelectedUserReviews() {
-    if (!this.selectedUserId) return;
-    this.loadingReviews = true;
-    this.userService.getUserReviews(this.selectedUserId).subscribe({
-      next: (data) => (this.userReviews = data),
-      error: (error) => this.handleError('Could not load user reviews', error),
-      complete: () => (this.loadingReviews = false),
-    });
-  }
-
-  addRole(index: number) {
-    this.roleDrafts.splice(index + 1, 0, '');
-  }
-
-  removeRole(index: number) {
-    this.roleDrafts.splice(index, 1);
-  }
-
-  submitRoles() {
-    this.creatingRoles = true;
-    this.message = '';
-    this.error = '';
-    this.roleService.addRoles(this.roleDrafts.filter((r) => r.trim())).subscribe({
-      next: () => {
-        this.message = 'Roles added successfully';
-        this.roleDrafts = [''];
-        this.loadRoles();
-      },
-      error: (error) => this.handleError('Could not add roles', error),
-      complete: () => (this.creatingRoles = false),
-    });
-  }
-
-  toggleSelectedRole(role: string) {
-    if (this.selectedRoles.includes(role)) {
-      this.selectedRoles = this.selectedRoles.filter((current) => current !== role);
-    } else {
-      this.selectedRoles = [...this.selectedRoles, role];
-    }
-  }
-
-  saveUserRoles() {
-    if (!this.selectedUserId) return;
-    this.savingRoles = true;
-    this.message = '';
-    this.error = '';
-    this.userService.updateUserRoles(this.selectedUserId, this.selectedRoles).subscribe({
-      next: (updatedUser) => {
-        this.selectedUser = updatedUser;
-        this.selectedRoles = [...updatedUser.roles];
-        this.users = this.users.map((user) => (user.id === updatedUser.id ? updatedUser : user));
-        this.message = 'User roles updated successfully';
-      },
-      error: (error) => this.handleError('Could not update user roles', error),
-      complete: () => (this.savingRoles = false),
-    });
-  }
-
-  private handleError(message: string, error: unknown) {
-    console.error('[Admin]', message, error);
-    this.error = message;
-    this.message = '';
-    this.loadingUsers = false;
-    this.loadingRoles = false;
-    this.loadingReviews = false;
-    this.loadingFeedback = false;
-    this.creatingRoles = false;
-    this.savingRoles = false;
+  ngOnDestroy(): void {
+    this.iframeUrl.set(null);
   }
 }
