@@ -6,6 +6,7 @@ import com.example.restaurant.entity.User;
 import com.example.restaurant.repository.RestaurantRepository;
 import com.example.restaurant.repository.ReviewRepository;
 import com.example.restaurant.repository.UserRepository;
+import com.example.restaurant.saga.AddRestaurantSaga;
 import com.example.restaurant.service.dto.RestaurantDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -23,20 +24,26 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final AddRestaurantSaga addRestaurantSaga;
 
     private static final Logger logger = LoggerFactory.getLogger(RestaurantService.class);
 
     public RestaurantService(RestaurantRepository restaurantRepository,
-                             UserRepository userRepository, ReviewRepository reviewRepository) {
+                             UserRepository userRepository,
+                             ReviewRepository reviewRepository,
+                             AddRestaurantSaga addRestaurantSaga) {
         this.restaurantRepository = restaurantRepository;
         this.userRepository = userRepository;
         this.reviewRepository = reviewRepository;
+        this.addRestaurantSaga = addRestaurantSaga;
     }
 
+    @Transactional(Transactional.TxType.NOT_SUPPORTED)
     public RestaurantDto addRestaurant(RestaurantDto restaurantDto) {
-        Restaurant restaurant = new Restaurant();
-        Optional<User> owner = userRepository.findUserByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        Optional<User> owner = userRepository.findUserByEmail(
+                SecurityContextHolder.getContext().getAuthentication().getName());
 
+        Restaurant restaurant = new Restaurant();
         restaurant.setName(restaurantDto.getName());
         restaurant.setAddress(restaurantDto.getAddress());
         restaurant.setPhone(restaurantDto.getPhone());
@@ -44,8 +51,7 @@ public class RestaurantService {
         restaurant.setSchedule(restaurantDto.getSchedule());
         restaurant.setOwnerId(owner.get().getId());
 
-        restaurantRepository.save(restaurant);
-
+        addRestaurantSaga.execute(restaurant);
         return restaurantDto;
     }
 
