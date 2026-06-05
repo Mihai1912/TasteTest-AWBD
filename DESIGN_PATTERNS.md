@@ -42,7 +42,7 @@ This is what makes compensation meaningful — without it, an uncommitted DB wri
 
 ### Inter-service call & security
 
-`NotificationClient` issues a `POST` to `http://notification-service/api/notifications`. The host segment is a logical Eureka service id, resolved by Spring Cloud LoadBalancer to a concrete instance.
+`NotificationClient` issues a `POST` to `http://tastetest-notification-service/api/notifications`. The host segment is the logical Eureka service id (matching `spring.application.name` in `notification-service`), resolved by Spring Cloud LoadBalancer to a concrete instance.
 
 Both services sit behind JWT authentication (Part II §6). The `RestClientConfig` interceptor copies the inbound `Authorization` header from the current request onto the outbound request, so the notification call is authenticated as the same end user that created the restaurant. No service-to-service credential is needed.
 

@@ -104,22 +104,33 @@ Config Server rulează pe `http://localhost:8888` și este pornit automat prin `
 
 ---
 
-## Service discovery și comunicare inter-servicii
+## Arhitectura microserviciilor
 
-Pentru cerința de microservicii am adăugat:
+Aplicația a fost desfăcută din monolit într-un set de microservicii independente, înregistrate în Eureka și accesate prin API Gateway. Fiecare microserviciu are propriul `pom.xml`, propriul `Dockerfile` și propriul ciclu de viață.
 
-- **Eureka Discovery Server** la `http://localhost:8761`
-- **Notification Service** la `http://localhost:8082`
-- **Spring Cloud LoadBalancer** în backend pentru apel REST între servicii
+| Serviciu | Director | Eureka name | Port (intern) | Port (host) | Rol |
+|---|---|---|---|---|---|
+| Discovery Server | `discovery-server/` | `tastetest-discovery-server` | 8761 | 8761 | registry Eureka |
+| Config Server | `config-server/` | `tastetest-config-server` | 8888 | 8888 | configurare centralizată |
+| API Gateway | `api-gateway/` | `tastetest-api-gateway` | 80 | 8090 | Spring Cloud Gateway, intrare publică |
+| Auth Service | `auth-service/` | `tastetest-auth` | 8091 | 8091 | autentificare + emitere JWT |
+| User Service | `user-service/` | `tastetest-user` | 8092 | 8092 | conturi, roluri, recenzii |
+| Restaurant Service | `restaurant-service/` | `tastetest-restaurant` | 8093 | 8093 | restaurante, meniuri, rating |
+| Notification Service | `notification-service/` | `tastetest-notification-service` | 8082 | 8082 | notificări (Saga step 2, vezi [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md)) |
+| Agent Service | `agent-service/` | `tastetest-agent` | 8083 | 8083 | AI assistant Claude (Part II §12, vezi [AI_AGENTS.md](AI_AGENTS.md)) |
+| Backend original | `backend-original/` | `tastetest-awdb` | 8090 | — (intern) | monolit legacy păstrat pentru migrare graduală |
+| Frontend (Angular shell) | `frontend/` | — | 80 | 4200 | UI principal |
+| MFE Admin | `mfe-admin/` | — | 80 | 4201 | micro-frontend admin (Part II §10), embedat în shell prin iframe |
+| PostgreSQL | — (image) | — | 5432 | 5432 | bază de date partajată |
+| Prometheus | — (image) | — | 9090 | 9090 | scrape `/actuator/prometheus` |
+| Grafana | — (image) | — | 3000 | 3000 | dashboard observability |
+| Zipkin | — (image) | — | 9411 | 9411 | tracing distribuit |
 
-Servicii înregistrate în registry:
+Comunicarea inter-servicii folosește **Spring Cloud LoadBalancer** peste Eureka — apelurile sunt scrise ca `http://<eureka-name>/...` și sunt rezolvate la runtime la o instanță concretă (vezi `RestClientConfig` în `restaurant-service` și `agent-service`).
 
-- `tastetest-awdb`
-- `tastetest-config-server`
-- `tastetest-notification-service`
-- `tastetest-discovery-server` este registry-ul care le descoperă automat
+Toate apelurile externe trec prin **API Gateway** (`http://localhost:8090`), care le rutează către microserviciul potrivit pe baza căii — vezi `api-gateway/src/main/resources/application.yml` pentru rute. Tokenul JWT emis de `auth-service` este acceptat de toate celelalte servicii (HS512, secret partajat prin `vars.security.secret`).
 
-Endpoint demo în backend:
+Endpoint demo Saga (Part II §8):
 
 ```http
 POST /api/v1/integrations/notifications/demo
@@ -235,11 +246,16 @@ Pornește Discovery Server + Config Server + backend + Notification Service + fr
 docker compose up --build
 ```
 
-- Discovery Server: `http://localhost:8761`
-- Backend (profil `dev`): `http://localhost:8090`
+- API Gateway (intrare publică): `http://localhost:8090`
+- Frontend Angular (shell): `http://localhost:4200`
+- MFE Admin: `http://localhost:4201`
+- Discovery Server (Eureka): `http://localhost:8761`
 - Config Server: `http://localhost:8888`
+- Auth Service: `http://localhost:8091`
+- User Service: `http://localhost:8092`
+- Restaurant Service: `http://localhost:8093`
 - Notification Service: `http://localhost:8082`
-- Frontend Angular: `http://localhost:4200`
+- Agent Service (TasteBot): `http://localhost:8083`
 - PostgreSQL: `localhost:5432`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (admin/admin)
