@@ -11,10 +11,16 @@ import com.example.restaurant.service.dto.RestaurantDto;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import static com.example.restaurant.config.CacheConfig.ALL_RESTAURANTS_CACHE;
+import static com.example.restaurant.config.CacheConfig.RATINGS_CACHE;
+import static com.example.restaurant.config.CacheConfig.TOP_RATED_CACHE;
 
 import java.util.*;
 
@@ -39,6 +45,7 @@ public class RestaurantService {
     }
 
     @Transactional(Transactional.TxType.NOT_SUPPORTED)
+    @CacheEvict(value = {ALL_RESTAURANTS_CACHE, TOP_RATED_CACHE}, allEntries = true)
     public RestaurantDto addRestaurant(RestaurantDto restaurantDto) {
         Optional<User> owner = userRepository.findUserByEmail(
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -55,6 +62,7 @@ public class RestaurantService {
         return restaurantDto;
     }
 
+    @CacheEvict(value = {ALL_RESTAURANTS_CACHE, TOP_RATED_CACHE}, allEntries = true)
     public void deleteRestaurant(UUID id) {
         logger.info("Deleting restaurant with id: " + id);
         Restaurant restaurant = checkRestaurant(id);
@@ -64,6 +72,7 @@ public class RestaurantService {
         restaurantRepository.delete(restaurant);
     }
 
+    @CacheEvict(value = {ALL_RESTAURANTS_CACHE, TOP_RATED_CACHE}, allEntries = true)
     public RestaurantDto updateRestaurant(UUID id, RestaurantDto restaurantDto) {
         Restaurant restaurant = checkRestaurant(id);
         checkOwner(restaurant);
@@ -89,6 +98,7 @@ public class RestaurantService {
                 restaurantEntity.getSchedule());
     }
 
+    @Cacheable(ALL_RESTAURANTS_CACHE)
     public List<RestaurantDto> getAllRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return restaurants.stream().map(restaurant -> new RestaurantDto(
@@ -112,6 +122,7 @@ public class RestaurantService {
         ));
     }
 
+    @Cacheable(value = RATINGS_CACHE, key = "#id")
     public double getRatings(UUID id) {
         Optional<List<Review>> reviews = reviewRepository.findAllByRestaurantId(id);
         if (reviews.isEmpty()) {
@@ -141,6 +152,7 @@ public class RestaurantService {
         owner.get();
     }
 
+    @Cacheable(TOP_RATED_CACHE)
     public List<RestaurantDto> getTopRatedRestaurants() {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         Map<UUID, Double> restaurantRatings = new HashMap<>();

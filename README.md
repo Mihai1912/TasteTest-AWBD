@@ -122,6 +122,8 @@ Aplicația a fost desfăcută din monolit într-un set de microservicii independ
 | Frontend (Angular shell) | `frontend/` | — | 80 | 4200 | UI principal |
 | MFE Admin | `mfe-admin/` | — | 80 | 4201 | micro-frontend admin (Part II §10), embedat în shell prin iframe |
 | PostgreSQL | — (image) | — | 5432 | 5432 | bază de date partajată |
+| Redis | — (image) | — | 6379 | 6379 | caching layer pentru Restaurant Service (Part II §9, vezi [NOSQL_CACHING.md](NOSQL_CACHING.md)) |
+| MongoDB | — (image) | — | 27017 | 27017 | bază NoSQL — istoric notificări (Part II §9, vezi [NOSQL_CACHING.md](NOSQL_CACHING.md)) |
 | Prometheus | — (image) | — | 9090 | 9090 | scrape `/actuator/prometheus` |
 | Grafana | — (image) | — | 3000 | 3000 | dashboard observability |
 | Zipkin | — (image) | — | 9411 | 9411 | tracing distribuit |
@@ -148,6 +150,17 @@ Exemplu body:
 Răspunsul vine de la Notification Service prin Eureka + Spring Cloud LoadBalancer.
 
 Răspunsul include și `instanceId`, ca să poți vedea clar ce instanță a procesat cererea atunci când rulezi mai multe copii ale serviciului.
+
+---
+
+## NoSQL și Caching (Part II §9)
+
+Documentație completă: [NOSQL_CACHING.md](NOSQL_CACHING.md).
+
+- **Redis (caching layer)** — `restaurant-service` cache-uiește `getAllRestaurants()`, `getTopRatedRestaurants()` (anterior N+1 — încărca toate restaurantele și, pentru fiecare, toate recenziile, ca să calculeze media) și `getRatings(id)`, cu TTL diferențiat (60s / 30s / 30s) configurat în `restaurant-service/.../config/CacheConfig.java`. Mutațiile locale (`addRestaurant`, `updateRestaurant`, `deleteRestaurant`) fac `@CacheEvict` imediat; datele derivate din recenzii (scrise din `user-service`) se bazează pe TTL pentru consistență eventuală, pentru că nu există un mecanism cross-service de invalidare.
+- **MongoDB (bază NoSQL)** — `notification-service` era complet stateless (răspundea la `POST /api/notifications` fără să persiste nimic). Acum salvează fiecare notificare ca document în colecția `notifications` și expune `GET /api/notifications/history` (ultimele 20).
+
+Ambele rulează ca containere separate (`redis`, `mongo`) în `docker-compose.yml`, cu propriile healthcheck-uri și (pentru Mongo) volum persistent `tastetest-mongo-vol`.
 
 ---
 
@@ -257,6 +270,8 @@ docker compose up --build
 - Notification Service: `http://localhost:8082`
 - Agent Service (TasteBot): `http://localhost:8083`
 - PostgreSQL: `localhost:5432`
+- Redis (cache, vezi [NOSQL_CACHING.md](NOSQL_CACHING.md)): `localhost:6379`
+- MongoDB (istoric notificări, vezi [NOSQL_CACHING.md](NOSQL_CACHING.md)): `localhost:27017`
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3000` (admin/admin)
 - Zipkin: `http://localhost:9411`

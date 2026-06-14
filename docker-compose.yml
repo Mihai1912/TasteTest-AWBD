@@ -49,6 +49,32 @@ services:
       timeout: 5s
       retries: 10
 
+  # Caching layer for restaurant-service (Part II §9): caches the top-rated /
+  # all-restaurants / ratings reads, which are otherwise N+1 queries.
+  redis:
+    image: redis:7-alpine
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # NoSQL store for notification-service (Part II §9): persists the
+  # notification history as documents.
+  mongo:
+    image: mongo:7
+    ports:
+      - 27017:27017
+    volumes:
+      - tastetest-mongo-vol:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   auth:
     build:
       context: .
@@ -128,6 +154,8 @@ services:
         condition: service_healthy
       tastetest-app-db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: dev
       CONFIG_SERVER_URL: http://config-server:8888
@@ -140,6 +168,8 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
       SERVER_PORT: 8093
     ports:
       - 8093:8093
@@ -258,8 +288,11 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+      mongo:
+        condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      MONGODB_URI: mongodb://mongo:27017/tastetest_notifications
       SERVER_PORT: 8082
     ports:
       - 8082:8082
@@ -316,5 +349,6 @@ services:
 
 volumes:
   tastetest-app-db-vol:
+  tastetest-mongo-vol:
   prometheus-data:
   grafana-data:

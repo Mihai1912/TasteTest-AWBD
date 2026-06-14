@@ -16,3 +16,7 @@ spring:
     validate-on-migrate: false
     table: project_schema_version
     schemas: project
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}

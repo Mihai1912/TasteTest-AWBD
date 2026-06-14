@@ -1,6 +1,9 @@
 spring:
   application:
     name: tastetest-notification-service
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://mongo:27017/tastetest_notifications}
 
 server:
   port: ${SERVER_PORT:8082}
