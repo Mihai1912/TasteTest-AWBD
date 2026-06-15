@@ -164,6 +164,18 @@ Ambele rulează ca containere separate (`redis`, `mongo`) în `docker-compose.ym
 
 ---
 
+## CI/CD (Part II §11)
+
+Documentație completă: [CI_CD.md](CI_CD.md).
+
+Pipeline GitHub Actions în [.github/workflows/ci.yml](.github/workflows/ci.yml), declanșat la push/PR pe `main`:
+
+1. **`backend`** — `./mvnw -B -ntp verify` la rădăcină: compilează toate cele 9 module Maven și rulează testele existente (ex. `ReviewServiceTest`).
+2. **`frontend`** — build Angular (matrix `frontend` + `mfe-admin`): `npm ci && npm run build`.
+3. **`docker-build-push`** — doar pe push la `main`, după ce primele două job-uri trec: construiește imaginile Docker pentru toate cele 11 servicii și le publică în GitHub Container Registry cu tag-urile `:staging` (folosit pentru deployment automat în staging) și `:sha-<commit>`.
+
+---
+
 ## Pași de utilizare
 
 ### 1. Clonarea proiectului
