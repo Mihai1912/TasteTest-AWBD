@@ -105,4 +105,19 @@ export class Restaurants implements OnInit {
   nextPage() {
     if (!this.last) this.goToPage(this.page + 1);
   }
+
+  private readonly cardGradients = [
+    'linear-gradient(135deg, #ffd166, #ef476f)',
+    'linear-gradient(135deg, #06d6a0, #118ab2)',
+    'linear-gradient(135deg, #8338ec, #3a86ff)',
+    'linear-gradient(135deg, #f72585, #b5179e)',
+    'linear-gradient(135deg, #ff9f1c, #ffbf69)',
+    'linear-gradient(135deg, #2ec4b6, #20a4f3)',
+    'linear-gradient(135deg, #e63946, #f1faee)',
+    'linear-gradient(135deg, #43aa8b, #f9c74f)',
+  ];
+
+  getCardGradient(i: number): string {
+    return this.cardGradients[i % this.cardGradients.length];
+  }
 }

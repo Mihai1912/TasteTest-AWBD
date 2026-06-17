@@ -1,20 +1,25 @@
 <nav class="navbar">
   <div class="nav-content">
-    <a routerLink="/home" class="logo">TasteTest</a>
+    <a routerLink="/home" class="logo">
+      <span class="logo-mark">●</span>
+      <span class="logo-text">TasteTest</span>
+    </a>
+
     <div class="nav-links">
-      <a routerLink="/restaurants">Restaurants</a>
-      <a routerLink="/assistant">Ask TasteBot</a>
-      <a routerLink="/feedback">Feedback</a>
-      <div class="nav-auth">
-        <ng-container *ngIf="isLoggedIn$ | async; else loggedOutLinks">
-          <span class="username">{{ userEmail$ | async }}</span>
-          <button (click)="logout()" class="logout-btn">Logout</button>
-        </ng-container>
-        <ng-template #loggedOutLinks>
-          <a routerLink="/login">Login</a>
-          <a routerLink="/register">Register</a>
-        </ng-template>
-      </div>
+      <a routerLink="/restaurants" routerLinkActive="active">Restaurants</a>
+      <a routerLink="/assistant" routerLinkActive="active">Ask TasteBot</a>
+      <a routerLink="/feedback" routerLinkActive="active">Feedback</a>
+    </div>
+
+    <div class="nav-auth">
+      <ng-container *ngIf="isLoggedIn$ | async; else loggedOutLinks">
+        <span class="username">{{ userEmail$ | async }}</span>
+        <button (click)="logout()" class="logout-btn secondary-btn">Sign out</button>
+      </ng-container>
+      <ng-template #loggedOutLinks>
+        <a routerLink="/login" class="auth-link">Sign in</a>
+        <a routerLink="/register" class="btn primary-btn">Join</a>
+      </ng-template>
     </div>
   </div>
 </nav>

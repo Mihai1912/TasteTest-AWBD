@@ -1,60 +1,91 @@
-<div class="restaurants-container">
-  <div class="header">
-    <h2>Restaurants</h2>
-    <a routerLink="/restaurants/add" class="add-btn">Add Restaurant</a>
+<div class="restaurants-page">
+  <div class="page-header">
+    <div class="container header-row">
+      <div>
+        <h1>Restaurants</h1>
+        <p class="page-subtitle">Discover places to eat, browse menus and read community reviews.</p>
+      </div>
+      <a routerLink="/restaurants/add" class="btn primary-btn">+ Add Restaurant</a>
+    </div>
   </div>
 
-  <div class="tabs">
-    <button [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">All Restaurants</button>
-    <button [class.active]="activeTab === 'topRated'" (click)="activeTab = 'topRated'">Top Rated</button>
-  </div>
+  <div class="container">
+    <div class="tabs">
+      <button [class.active]="activeTab === 'all'" (click)="activeTab = 'all'">All restaurants</button>
+      <button [class.active]="activeTab === 'topRated'" (click)="activeTab = 'topRated'">⭐ Top rated</button>
+    </div>
 
-  <div *ngIf="activeTab === 'all'" class="controls">
-    <label>
-      Sort by:
-      <select [(ngModel)]="sortField" (change)="onSortChange()">
-        <option *ngFor="let f of sortFields" [value]="f">{{ f }}</option>
-      </select>
-    </label>
-    <button type="button" class="dir-btn" (click)="toggleSortDir()">
-      {{ sortDir === 'asc' ? '↑ Asc' : '↓ Desc' }}
-    </button>
-    <label>
-      Per page:
-      <select [(ngModel)]="size" (change)="onSizeChange()">
-        <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
-      </select>
-    </label>
-  </div>
+    <div *ngIf="activeTab === 'all'" class="controls">
+      <label>
+        <span>Sort by</span>
+        <select [(ngModel)]="sortField" (change)="onSortChange()">
+          <option *ngFor="let f of sortFields" [value]="f">{{ f }}</option>
+        </select>
+      </label>
+      <button type="button" class="dir-btn secondary-btn" (click)="toggleSortDir()">
+        {{ sortDir === 'asc' ? '↑ Asc' : '↓ Desc' }}
+      </button>
+      <label>
+        <span>Per page</span>
+        <select [(ngModel)]="size" (change)="onSizeChange()">
+          <option *ngFor="let s of pageSizeOptions" [ngValue]="s">{{ s }}</option>
+        </select>
+      </label>
+    </div>
 
-  <div *ngIf="activeTab === 'all'">
-    <div class="restaurants-grid">
-      <div *ngFor="let restaurant of restaurants" class="restaurant-card" [routerLink]="['/restaurants', restaurant.id]">
-        <h3>{{ restaurant.name }}</h3>
-        <p><strong>Address:</strong> {{ restaurant.address }}</p>
-        <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-        <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
-        <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+    <div *ngIf="activeTab === 'all'">
+      <div class="restaurants-grid">
+        <div *ngFor="let restaurant of restaurants; let i = index"
+             class="restaurant-card"
+             [routerLink]="['/restaurants', restaurant.id]">
+          <div class="card-media" [style.background]="getCardGradient(i)">
+            <span class="card-emoji">🍽</span>
+            <span class="card-badge">Featured</span>
+          </div>
+          <div class="card-body">
+            <div class="card-rank">#{{ (page * size) + i + 1 }} · {{ restaurant.name }}</div>
+            <h3>{{ restaurant.name }}</h3>
+            <div class="rating-row">
+              <span class="bubbles">●●●●●</span>
+              <span class="reviews-count">Reviews</span>
+            </div>
+            <p class="card-line">📍 {{ restaurant.address }}</p>
+            <p class="card-line">📞 {{ restaurant.phone }}</p>
+            <p class="card-line">🕒 {{ restaurant.schedule }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button type="button" class="secondary-btn" (click)="prevPage()" [disabled]="first">← Previous</button>
+        <span class="page-info">
+          Page <strong>{{ page + 1 }}</strong> of {{ totalPages }}
+          <small>({{ totalElements }} total)</small>
+        </span>
+        <button type="button" class="secondary-btn" (click)="nextPage()" [disabled]="last">Next →</button>
       </div>
     </div>
 
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button type="button" (click)="prevPage()" [disabled]="first">Previous</button>
-      <span class="page-info">
-        Page {{ page + 1 }} of {{ totalPages }}
-        <small>({{ totalElements }} total)</small>
-      </span>
-      <button type="button" (click)="nextPage()" [disabled]="last">Next</button>
-    </div>
-  </div>
-
-  <div *ngIf="activeTab === 'topRated'" class="restaurants-grid">
-    <div *ngFor="let restaurant of topRated" class="restaurant-card" [routerLink]="['/restaurants', restaurant.id]">
-      <h3>{{ restaurant.name }}</h3>
-      <p><strong>Address:</strong> {{ restaurant.address }}</p>
-      <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-      <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
-      <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
+    <div *ngIf="activeTab === 'topRated'" class="restaurants-grid">
+      <div *ngFor="let restaurant of topRated; let i = index"
+           class="restaurant-card"
+           [routerLink]="['/restaurants', restaurant.id]">
+        <div class="card-media" [style.background]="getCardGradient(i)">
+          <span class="card-emoji">⭐</span>
+          <span class="card-badge gold">Top Rated</span>
+        </div>
+        <div class="card-body">
+          <div class="card-rank">#{{ i + 1 }} of Top Picks</div>
+          <h3>{{ restaurant.name }}</h3>
+          <div class="rating-row">
+            <span class="bubbles">●●●●●</span>
+            <span class="reviews-count">Top rated</span>
+          </div>
+          <p class="card-line">📍 {{ restaurant.address }}</p>
+          <p class="card-line">📞 {{ restaurant.phone }}</p>
+          <p class="card-line">🕒 {{ restaurant.schedule }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>

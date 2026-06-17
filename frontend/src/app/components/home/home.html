@@ -1,23 +1,87 @@
-<div class="home-container">
-  <div class="hero">
-    <h2>Welcome to TasteTest</h2>
-    <p>Your restaurant review and rating platform</p>
-  </div>
+<div class="home">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">Where to? Find your next great meal.</h1>
+      <p class="hero-subtitle">Search restaurants, browse menus, read honest reviews from our community.</p>
 
-  <div class="content">
-    <div class="card">
-      <h3>Discover Restaurants</h3>
-      <p>Explore and read reviews from our community</p>
+      <form class="search-card" (submit)="$event.preventDefault()">
+        <div class="search-tabs">
+          <button type="button" class="tab active">🍽 Restaurants</button>
+          <button type="button" class="tab">📖 Menus</button>
+          <button type="button" class="tab">⭐ Top Rated</button>
+          <button type="button" class="tab">🤖 TasteBot</button>
+        </div>
+        <div class="search-row">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Places to eat, cuisines, dishes..." class="search-input" />
+          <a routerLink="/restaurants" class="btn primary-btn search-btn">Search</a>
+        </div>
+      </form>
     </div>
+  </section>
 
-    <div class="card">
-      <h3>Share Your Reviews</h3>
-      <p>Tell others about your dining experience</p>
+  <!-- Category tiles -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">Explore TasteTest</h2>
+      <div class="category-grid">
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-art" style="background: linear-gradient(135deg, #ffd166, #ef476f);">🍴</div>
+          <h3>Restaurants</h3>
+          <p>Browse all venues</p>
+        </a>
+        <a routerLink="/restaurants" class="category-card">
+          <div class="category-art" style="background: linear-gradient(135deg, #06d6a0, #118ab2);">⭐</div>
+          <h3>Top Rated</h3>
+          <p>Highest-scoring picks</p>
+        </a>
+        <a routerLink="/assistant" class="category-card">
+          <div class="category-art" style="background: linear-gradient(135deg, #8338ec, #3a86ff);">🤖</div>
+          <h3>Ask TasteBot</h3>
+          <p>AI-powered suggestions</p>
+        </a>
+        <a routerLink="/feedback" class="category-card">
+          <div class="category-art" style="background: linear-gradient(135deg, #f72585, #b5179e);">💬</div>
+          <h3>Feedback</h3>
+          <p>Help us improve</p>
+        </a>
+      </div>
     </div>
+  </section>
 
-    <div class="card">
-      <h3>Rate & Review</h3>
-      <p>Give your honest feedback with ratings</p>
+  <!-- Feature strip -->
+  <section class="section feature-section">
+    <div class="container">
+      <h2 class="section-title">Why TasteTest?</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon">🌍</div>
+          <h3>Discover new spots</h3>
+          <p>Find hidden gems and local favorites curated by real food lovers.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">✍️</div>
+          <h3>Share your reviews</h3>
+          <p>Help others choose by telling the world about your dining experience.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🏅</div>
+          <h3>Trusted ratings</h3>
+          <p>Honest 5-star ratings, replies, and feedback from a verified community.</p>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- CTA banner -->
+  <section class="cta-banner">
+    <div class="container cta-inner">
+      <div>
+        <h2>Ready to taste-test something new?</h2>
+        <p>Join the community and start reviewing today.</p>
+      </div>
+      <a routerLink="/restaurants" class="btn primary-btn cta-btn">Browse restaurants</a>
+    </div>
+  </section>
 </div>

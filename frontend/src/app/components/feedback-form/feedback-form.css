@@ -1,82 +1,52 @@
-.container, .form-container, .detail-container, .menu-container, .feedback-container, .admin-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.feedback-container {
+  max-width: 760px;
+  margin: 2.5rem auto;
+  padding: 2.5rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.feedback-container h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.85rem;
+  letter-spacing: -0.025em;
+}
+
+.feedback-container > p {
+  color: var(--text-muted);
+  margin: 0 0 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #2c3e50;
+  margin-bottom: 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 
-.form-group input, .form-group select, .form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+.feedback-container button {
+  background: var(--ta-green);
+  border-color: var(--ta-green);
+  padding: 0.85rem 1.6rem;
 }
 
-.form-group textarea {
-  min-height: 120px;
-  resize: vertical;
-}
-
-button {
-  padding: 0.75rem 1.5rem;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #764ba2;
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background-color: #667eea;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-}
-
-.section {
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid #ddd;
-}
-
-.review, .item {
-  padding: 1rem;
-  margin: 1rem 0;
-  background-color: #f9f9f9;
-  border-left: 4px solid #667eea;
-  border-radius: 4px;
+.feedback-container button:hover:not(:disabled) {
+  background: var(--ta-green-dark);
+  border-color: var(--ta-green-dark);
 }
 
 .message {
-  padding: 1rem;
+  padding: 0.9rem 1.1rem;
   margin-top: 1rem;
-  background-color: #d4edda;
-  color: #155724;
-  border-radius: 4px;
-}
-
-.items-list {
-  display: grid;
-  gap: 1rem;
+  background: var(--ta-green-soft);
+  color: var(--ta-green-darker);
+  border-left: 4px solid var(--ta-green);
+  border-radius: var(--radius);
 }
