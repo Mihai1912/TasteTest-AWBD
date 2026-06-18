@@ -3,6 +3,11 @@ spring:
     name: tastetest-api-gateway
   cloud:
     gateway:
+      # LLM inference can take 60-120 seconds; raise the global HTTP client
+      # response timeout so the gateway does not 504 before the model replies.
+      httpclient:
+        response-timeout: 150s
+        connect-timeout: 5000
       default-filters:
         - AddResponseHeader=X-Gateway, tastetest-api-gateway
       routes:

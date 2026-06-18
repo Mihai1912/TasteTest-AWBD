@@ -139,12 +139,9 @@ export class AuthService {
       this.setExpirationTime(expirationTime);
     }
 
-    if (!this.isTokenValid()) {
-      this.debug('Stored token is invalid or expired on startup; logging out');
-      this.logout();
-      return;
-    }
-
+    // Don't auto-logout on startup based on local clock — keep the user signed
+    // in and let the next server response decide whether the token is still
+    // accepted.
     this.loggedInSubject.next(true);
     this.debug('Auth restored from storage', {
       email: storedEmail,
@@ -237,14 +234,24 @@ export class AuthService {
       return;
     }
 
-    const timerDuration = timeUntilExpiration;
-
     this.debug(`Token expires in ${Math.round(timeUntilExpiration / 1000)} seconds`);
 
-    this.tokenExpirationTimer = setTimeout(() => {
-      this.warn('Token expiration timer triggered. Logging out...');
-      this.logout();
-    }, timerDuration);
+    // setTimeout is capped at ~24.8 days (2^31-1 ms). For longer-lived tokens we
+    // chain timers so the auto-logout still fires at the real expiration time.
+    const MAX_TIMEOUT = 2_147_483_000;
+    const schedule = (remaining: number) => {
+      const delay = Math.min(remaining, MAX_TIMEOUT);
+      this.tokenExpirationTimer = setTimeout(() => {
+        const left = remaining - delay;
+        if (left > 0) {
+          schedule(left);
+        } else {
+          this.warn('Token expiration timer triggered. Logging out...');
+          this.logout();
+        }
+      }, delay);
+    };
+    schedule(timeUntilExpiration);
   }
 
   validateToken(): Observable<string> {
@@ -287,7 +294,11 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!this.getToken() && this.isTokenValid();
+    // Treat presence of a token as "logged in" — let the server be the source
+    // of truth for whether it's actually accepted. This avoids client-side
+    // expiry math (clock skew, short-lived backend TTLs that haven't been
+    // re-issued yet, etc.) bouncing the user to /login on every navigation.
+    return !!this.getToken();
   }
 
   private debug(message: string, data?: unknown): void {

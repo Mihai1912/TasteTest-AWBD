@@ -1,7 +1,7 @@
 <div class="assistant">
   <header class="assistant-header">
     <h2>Ask TasteBot</h2>
-    <p class="subtitle">Your AI guide to restaurants on TasteTest. Powered by Claude, with live access to the catalog and your reviews.</p>
+    <p class="subtitle">Your AI guide to restaurants on TasteTest. Powered by a local LLM, with live access to the catalog and your reviews.</p>
   </header>
 
   <div class="chat-window" #chatWindow>
@@ -14,7 +14,10 @@
 
     <div *ngFor="let turn of turns" class="turn turn-{{ turn.role }}">
       <div class="turn-label">{{ turn.role === 'user' ? 'You' : turn.role === 'assistant' ? 'TasteBot' : 'Error' }}</div>
-      <div class="turn-text">{{ turn.text }}</div>
+      <div *ngIf="turn.role === 'assistant' && turn.html; else plainText" class="turn-text turn-md" [innerHTML]="turn.html"></div>
+      <ng-template #plainText>
+        <div class="turn-text">{{ turn.text }}</div>
+      </ng-template>
     </div>
 
     <div *ngIf="loading" class="turn turn-assistant">

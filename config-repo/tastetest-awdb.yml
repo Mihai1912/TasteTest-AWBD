@@ -1,5 +1,5 @@
 token:
-  ttl: 3600000
+  ttl: 2592000000
   secret: tastetest-awdb-dev-secret-tastetest-awdb-dev-secret-tastetest-extended-for-hs512-min-64-bytes
 
 admin:

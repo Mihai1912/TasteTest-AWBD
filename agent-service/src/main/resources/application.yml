@@ -2,11 +2,16 @@ spring:
   application:
     name: tastetest-agent
   ai:
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY:dummy-please-override}
+    openai:
+      # LM Studio exposes an OpenAI-compatible server. The Spring AI OpenAI client
+      # appends "/v1/chat/completions" to base-url, so point this at the host only.
+      base-url: ${OPENAI_BASE_URL:http://127.0.0.1:1234}
+      # LM Studio doesn't require an API key, but Spring AI's client refuses an
+      # empty value — any non-empty placeholder works.
+      api-key: ${OPENAI_API_KEY:lm-studio}
       chat:
         options:
-          model: ${ANTHROPIC_MODEL:claude-haiku-4-5}
+          model: ${OPENAI_MODEL:openai/gpt-oss-20b}
           max-tokens: 1024
           temperature: 0.4
 

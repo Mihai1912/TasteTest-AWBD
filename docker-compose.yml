@@ -302,9 +302,10 @@ services:
       timeout: 3s
       retries: 10
 
-  # AI Agent service (Part II §12). Spring AI + Anthropic Claude Haiku, exposes
-  # POST /api/v1/agent/chat through the gateway. Tools call the live restaurant /
-  # user services via load-balanced RestTemplate, propagating the caller's JWT.
+  # AI Agent service (Part II §12). Spring AI + local LLM via LM Studio
+  # (OpenAI-compatible API), exposes POST /api/v1/agent/chat through the gateway.
+  # Tools call the live restaurant / user services via load-balanced RestTemplate,
+  # propagating the caller's JWT.
   agent-service:
     build:
       context: ./agent-service
@@ -312,11 +313,16 @@ services:
     depends_on:
       discovery-server:
         condition: service_healthy
+    extra_hosts:
+      # Lets the container reach LM Studio running on the host on Linux too.
+      - "host.docker.internal:host-gateway"
     environment:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://discovery-server:8761/eureka/
       SERVER_PORT: 8083
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-dummy-please-override}
-      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5}
+      # From inside Docker, the host's LM Studio is reachable via host.docker.internal.
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://host.docker.internal:1234}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-lm-studio}
+      OPENAI_MODEL: ${OPENAI_MODEL:-openai/gpt-oss-20b}
     ports:
       - 8083:8083
     healthcheck:

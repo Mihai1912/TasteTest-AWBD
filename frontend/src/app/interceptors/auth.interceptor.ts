@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
@@ -14,7 +14,7 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    const token = localStorage.getItem('access_token');
+    const token = this.authService.getToken();
     if (token) {
       req = req.clone({
         setHeaders: {
@@ -25,14 +25,32 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       catchError(error => {
-        // Handle 401 Unauthorized - token expired or invalid
-        if (error.status === 401) {
-          console.warn('Token expired or invalid. Logging out...');
+        // Only force a logout when the server tells us the token itself is
+        // bad — i.e. it sent back an "expired/invalid token" 401. Generic
+        // 401s from individual endpoints (admin-only data, permission gaps)
+        // must NOT nuke the whole session.
+        if (this.isTokenRejection(error)) {
+          console.warn('Server rejected the stored token. Logging out...');
           this.authService.logout();
           this.router.navigate(['/login']);
         }
         return throwError(() => error);
       })
+    );
+  }
+
+  private isTokenRejection(error: unknown): boolean {
+    if (!(error instanceof HttpErrorResponse)) return false;
+    if (error.status !== 401) return false;
+    const body = error.error;
+    const message: string = (typeof body === 'string' ? body : body?.message || body?.error || '')
+      .toString()
+      .toLowerCase();
+    return (
+      message.includes('expired') ||
+      message.includes('invalid token') ||
+      message.includes('missing authorization') ||
+      message.includes('jwt')
     );
   }
 }
