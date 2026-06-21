@@ -9,6 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +25,14 @@ public class JwtGenerator {
         this.tokenProperties = tokenProperties;
     }
 
+    private SecretKey signingKey() {
+        // Use raw UTF-8 bytes of the configured secret. SecretKeySpec accepts any length
+        // (Keys.hmacShaKeyFor would reject < 64 bytes for HS512).
+        // This must match auth-service/gateway/restaurant/user/notification/agent, otherwise
+        // tokens issued by auth-service fail signature verification here and every protected
+        // endpoint (e.g. /api/v1/review, /api/v1/feedback) returns 401.
+        return new SecretKeySpec(tokenProperties.getSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA512");
+    }
 
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
@@ -38,13 +49,14 @@ public class JwtGenerator {
                 .setIssuedAt(new Date())
                 .setIssuer("http://localhost:8090")
                 .setExpiration(expireDate)
-                .signWith(SignatureAlgorithm.HS512, tokenProperties.getSecret())
+                .signWith(signingKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
     public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(tokenProperties.getSecret())
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(signingKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
         return claims.getSubject();
@@ -52,7 +64,7 @@ public class JwtGenerator {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(tokenProperties.getSecret()).parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(signingKey()).build().parseClaimsJws(token);
             return true;
         } catch (Exception ex) {
             throw new AuthenticationCredentialsNotFoundException("JWT was expired or incorrect");
