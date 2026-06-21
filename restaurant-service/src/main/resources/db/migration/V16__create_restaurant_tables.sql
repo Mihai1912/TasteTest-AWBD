@@ -33,9 +33,14 @@ CREATE TABLE IF NOT EXISTS project.restaurants (
   owner_id UUID NOT NULL REFERENCES project.users(id) ON DELETE CASCADE
 );
 
+-- Column names must match the canonical reviews schema owned by the monolith
+-- (V3__CREATE_REVIEWS) and the restaurant-service Review entity, which maps the
+-- review text to the "comment" column. Using "content" here broke
+-- getTopRatedRestaurants() with a "column comment does not exist" 400.
 CREATE TABLE IF NOT EXISTS project.reviews (
   id UUID PRIMARY KEY,
-  content TEXT,
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   user_id UUID NOT NULL REFERENCES project.users(id) ON DELETE CASCADE,
   restaurant_id UUID NOT NULL REFERENCES project.restaurants(id) ON DELETE CASCADE,
   rating INTEGER CHECK (rating >= 1 AND rating <= 5)
