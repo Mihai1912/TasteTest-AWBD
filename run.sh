@@ -96,6 +96,101 @@ case "$COMMAND" in
     docker compose exec "$SERVICE" /bin/sh
     ;;
 
+  scale)
+    # Run one service with N instances and watch the gateway load-balance across them.
+    # Spring Cloud Gateway resolves `lb://<app>` via Eureka and round-robins requests.
+    SERVICE=${2:-restaurants}
+    COUNT=${3:-3}
+    REQUESTS=${4:-12}
+
+    # Map docker-compose service name -> Eureka app name + a gateway path to probe.
+    case "$SERVICE" in
+      restaurants)         APP=tastetest-restaurant;           TEST_PATH=/api/v1/restaurant/paged ;;
+      auth)                APP=tastetest-auth;                 TEST_PATH=/api/v1/auth/health ;;
+      users)               APP=tastetest-user;                 TEST_PATH=/api/v1/user/getAll ;;
+      notification-service) APP=tastetest-notification-service; TEST_PATH=/api/internal/notifications ;;
+      agent-service)       APP=tastetest-agent;                TEST_PATH=/api/v1/agent/health ;;
+      backend-original)    APP=tastetest-awdb;                 TEST_PATH=/api/restaurants ;;
+      *) echo "✗ Unsupported service '$SERVICE'. Use one of: restaurants auth users notification-service agent-service backend-original"; exit 1 ;;
+    esac
+
+    echo "⚖️  Scaling '$SERVICE' to $COUNT instances and testing gateway routing..."
+    echo ""
+
+    # Dynamic override: drop the fixed host-port mapping (so replicas don't collide)
+    # and stream each instance's Tomcat access log to stdout (so we can see which
+    # replica handled each request, prefixed by the container name in compose logs).
+    OVERRIDE=$(mktemp /tmp/tastetest-scale-XXXXXX.yml)
+    trap 'rm -f "$OVERRIDE"' EXIT
+    # `!override []` forces Compose to REPLACE the host-port mapping with an empty
+    # list. A plain `ports: []` does not work: Compose concatenates `ports` across
+    # files, so the base `8093:8093` would survive and every replica would collide.
+    cat > "$OVERRIDE" <<EOF
+services:
+  $SERVICE:
+    ports: !override []
+    environment:
+      SERVER_TOMCAT_ACCESSLOG_ENABLED: "true"
+      SERVER_TOMCAT_ACCESSLOG_DIRECTORY: /dev
+      SERVER_TOMCAT_ACCESSLOG_PREFIX: stdout
+      SERVER_TOMCAT_ACCESSLOG_SUFFIX: ""
+      SERVER_TOMCAT_ACCESSLOG_FILE_DATE_FORMAT: ""
+      SERVER_TOMCAT_ACCESSLOG_BUFFERED: "false"
+EOF
+
+    docker compose -f docker-compose.yml -f "$OVERRIDE" up -d --scale "$SERVICE=$COUNT" "$SERVICE"
+
+    echo ""
+    echo "⏳ Waiting for instances to register with Eureka..."
+    sleep 15
+
+    echo ""
+    echo "📦 Running instances of '$SERVICE':"
+    docker compose ps "$SERVICE"
+
+    echo ""
+    echo "🗂️  Eureka registrations for '$APP':"
+    curl -s "http://localhost:8761/eureka/apps/$APP" \
+      | grep -o '<instanceId>[^<]*</instanceId>' || echo "   (none yet — give it a few more seconds)"
+
+    # The gateway enforces JWT auth, so grab a token first — otherwise every
+    # request is rejected at the gateway and never reaches the instances.
+    echo ""
+    echo "🔐 Obtaining a JWT (admin@admin.com) so requests pass the gateway..."
+    TOKEN=$(curl -s -X POST http://localhost:8090/api/v1/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{"email":"admin@admin.com","password":"admin"}' \
+      | grep -o '"access_token":"[^"]*"' | sed 's/"access_token":"//;s/"//')
+    if [ -z "$TOKEN" ]; then
+      echo "   ⚠️  Could not get a token; sending unauthenticated (may 401 at the gateway)."
+      AUTH=()
+    else
+      echo "   ✓ Token acquired."
+      AUTH=(-H "Authorization: Bearer $TOKEN")
+    fi
+
+    echo ""
+    echo "📡 Sending $REQUESTS requests to http://localhost:8090$TEST_PATH ..."
+    SINCE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    for i in $(seq 1 "$REQUESTS"); do
+      CODE=$(curl -s -o /dev/null -w "%{http_code}" "${AUTH[@]}" "http://localhost:8090$TEST_PATH")
+      printf "   request %2d -> HTTP %s\n" "$i" "$CODE"
+    done
+
+    sleep 2
+    echo ""
+    echo "📊 Requests handled per instance (from access logs):"
+    docker compose logs --since "$SINCE" "$SERVICE" 2>/dev/null \
+      | grep -F "$TEST_PATH" \
+      | awk '{print $1}' | sort | uniq -c \
+      || echo "   (no access-log lines captured)"
+
+    echo ""
+    echo "✓ Done. The counts above show the gateway round-robining across replicas."
+    echo "💡 Watch it live in another terminal: ./run.sh logs $SERVICE"
+    echo "💡 Scale back down with: docker compose up -d --scale $SERVICE=1 $SERVICE"
+    ;;
+
   test-health)
     echo "🏥 Testing service health..."
     echo ""
@@ -152,6 +247,8 @@ case "$COMMAND" in
     echo "  status          Show status of all services"
     echo "  rebuild         Rebuild images and restart all services"
     echo "  shell [service] Open shell in a service container"
+    echo "  scale [service] [count] [requests]"
+    echo "                  Run a service with N instances and watch the gateway route across them"
     echo "  test-health     Quick health check of all services"
     echo "  test-login      Test login with admin credentials"
     echo ""
@@ -159,6 +256,7 @@ case "$COMMAND" in
     echo "  ./run.sh up                    # Start everything"
     echo "  ./run.sh logs restaurant       # View restaurant service logs"
     echo "  ./run.sh shell api-gateway     # Shell into api-gateway"
+    echo "  ./run.sh scale restaurants 3   # 3 restaurant instances + routing test"
     echo "  ./run.sh test-health           # Check if all services are healthy"
     exit 1
     ;;

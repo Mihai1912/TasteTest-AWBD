@@ -1,94 +1,157 @@
-<div class="detail-container">
+<div class="restaurant-detail">
 
-  <div *ngIf="loading" class="loading">Loading restaurant details...</div>
+  <div *ngIf="loading" class="container state-block">
+    <div class="loading">Loading restaurant details...</div>
+  </div>
 
-  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="error" class="container state-block">
+    <div class="error-message">{{ error }}</div>
+  </div>
 
   <ng-container *ngIf="restaurant">
-    <div class="detail-header">
-      <h2>{{ restaurant.name }}</h2>
-      <!-- Edit link only visible to admin users -->
-      <a *ngIf="isAdmin" [routerLink]="['/restaurants', restaurantId, 'edit']" class="btn">Edit Restaurant</a>
-    </div>
+    <!-- ----------------------------- Hero ----------------------------- -->
+    <header class="detail-hero">
+      <div class="container hero-inner">
+        <a routerLink="/restaurants" class="back-link">← All restaurants</a>
 
-    <p><strong>Address:</strong> {{ restaurant.address }}</p>
-    <p><strong>Phone:</strong> {{ restaurant.phone }}</p>
-    <p><strong>Website:</strong> <a [href]="restaurant.website" target="_blank">{{ restaurant.website }}</a></p>
-    <p><strong>Schedule:</strong> {{ restaurant.schedule }}</p>
-    <p><strong>Rating:</strong> {{ rating.toFixed(2) }}/5</p>
+        <div class="hero-top">
+          <div class="hero-headings">
+            <span class="eyebrow">Restaurant</span>
+            <h1>{{ restaurant.name }}</h1>
 
-    <div class="section">
-      <h3>Menus</h3>
-      <!-- Add Menu button only visible to admin users -->
-      <button *ngIf="isAdmin" class="btn" (click)="addMenu()">Add Menu</button>
-      <p *ngIf="menus.length === 0">No menus available.</p>
-      <div *ngFor="let menu of menus">
-        <p>
-          <!-- Navigate to the dedicated menu page to view items -->
-          <a [routerLink]="['/menus', menu.id]">{{ menu.name || '(Unnamed menu)' }}</a>
-        </p>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>Reviews</h3>
-      <a [routerLink]="['/restaurants', restaurantId, 'review']" class="btn">Add Review</a>
-      <p *ngIf="reviews.length === 0">No reviews yet.</p>
-      <div *ngFor="let review of reviews" class="review">
-        <p><strong>{{ review.urserName }}</strong> - Rating: {{ review.rating }}/5</p>
-        <p *ngIf="review.createdAt"><small>{{ review.createdAt }}</small></p>
-        <p>{{ review.comment }}</p>
-
-        <div class="replies-section" *ngIf="review.id">
-          <h4>Replies</h4>
-          <div *ngIf="replyLoading[review.id]">Loading replies...</div>
-          <div *ngIf="replyErrors[review.id]" class="error-message">{{ replyErrors[review.id] }}</div>
-          <p *ngIf="!replyLoading[review.id] && (!repliesMap[review.id] || repliesMap[review.id].length === 0)">No replies yet.</p>
-
-          <div *ngFor="let reply of repliesMap[review.id] || []" class="reply">
-            <ng-container *ngIf="reply.id && replyEditing[reply.id]; else replyView">
-              <textarea
-                [(ngModel)]="replyEditDrafts[reply.id]"
-                name="reply-edit-{{ reply.id }}"
-              ></textarea>
-              <div class="reply-actions">
-                <button type="button" (click)="saveReply(review.id, reply)" [disabled]="replyUpdateSubmitting[reply.id]">
-                  {{ replyUpdateSubmitting[reply.id] ? 'Saving...' : 'Save' }}
-                </button>
-                <button type="button" class="secondary-btn" (click)="cancelReplyEdit(reply)">Cancel</button>
-              </div>
-            </ng-container>
-
-            <ng-template #replyView>
-              <p>{{ reply.text }}</p>
-              <p *ngIf="reply.createdAt"><small>{{ reply.createdAt }}</small></p>
-              <div class="reply-actions" *ngIf="canManageReplies && reply.id">
-                <button type="button" (click)="startReplyEdit(reply)">Edit</button>
-                <button type="button" class="secondary-btn" (click)="deleteReply(review.id, reply)" [disabled]="replyDeleteSubmitting[reply.id]">
-                  {{ replyDeleteSubmitting[reply.id] ? 'Deleting...' : 'Delete' }}
-                </button>
-              </div>
-            </ng-template>
+            <div class="rating-row" *ngIf="reviews.length > 0 || rating > 0">
+              <span class="bubbles" [attr.aria-label]="rating.toFixed(1) + ' out of 5'">
+                <span class="bubbles-track">●●●●●</span>
+                <span class="bubbles-fill" [style.width.%]="bubbleFillPercent(rating)">●●●●●</span>
+              </span>
+              <span class="rating-value">{{ rating.toFixed(1) }}</span>
+              <span class="rating-meta">·&nbsp;{{ reviews.length }} {{ reviews.length === 1 ? 'review' : 'reviews' }}</span>
+            </div>
           </div>
 
-          <div class="reply-form" *ngIf="canManageReplies">
-            <label for="reply-{{ review.id }}">Add a reply</label>
-            <textarea
-              id="reply-{{ review.id }}"
-              [(ngModel)]="replyDrafts[review.id]"
-              name="reply-{{ review.id }}"
-              placeholder="Write a reply..."
-            ></textarea>
-            <button type="button" (click)="submitReply(review.id)" [disabled]="replySubmitting[review.id]">
-              {{ replySubmitting[review.id] ? 'Sending...' : 'Send Reply' }}
-            </button>
-          </div>
+          <a *ngIf="isAdmin" [routerLink]="['/restaurants', restaurantId, 'edit']" class="btn secondary-btn edit-btn">
+            ✏️ Edit Restaurant
+          </a>
+        </div>
+
+        <div class="info-chips">
+          <span class="chip" *ngIf="restaurant.address">
+            <span class="chip-icon">📍</span>{{ restaurant.address }}
+          </span>
+          <span class="chip" *ngIf="restaurant.phone">
+            <span class="chip-icon">📞</span>{{ restaurant.phone }}
+          </span>
+          <span class="chip" *ngIf="restaurant.schedule">
+            <span class="chip-icon">🕒</span>{{ restaurant.schedule }}
+          </span>
+          <a class="chip chip-link" *ngIf="restaurant.website" [href]="restaurant.website" target="_blank" rel="noopener">
+            <span class="chip-icon">🌐</span>{{ displayWebsite(restaurant.website) }}
+          </a>
         </div>
       </div>
+    </header>
+
+    <div class="container detail-body">
+
+      <!-- ---------------------------- Menus ---------------------------- -->
+      <section class="section">
+        <div class="section-head">
+          <h2>Menus</h2>
+          <button *ngIf="isAdmin" class="btn primary-btn" (click)="addMenu()">+ Add Menu</button>
+        </div>
+
+        <p *ngIf="menus.length === 0" class="empty-note">No menus available yet.</p>
+
+        <div class="menu-grid" *ngIf="menus.length > 0">
+          <a *ngFor="let menu of menus" class="menu-card" [routerLink]="['/menus', menu.id]">
+            <span class="menu-icon">📋</span>
+            <span class="menu-name">{{ menu.name || '(Unnamed menu)' }}</span>
+            <span class="menu-cta">View menu →</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- --------------------------- Reviews --------------------------- -->
+      <section class="section">
+        <div class="section-head">
+          <h2>Reviews</h2>
+          <a [routerLink]="['/restaurants', restaurantId, 'review']" class="btn primary-btn">+ Add Review</a>
+        </div>
+
+        <p *ngIf="reviews.length === 0" class="empty-note">No reviews yet. Be the first to share your experience!</p>
+
+        <div class="reviews-list">
+          <article *ngFor="let review of reviews" class="review">
+            <header class="review-head">
+              <span class="avatar" [style.background]="getAvatarGradient(review.urserName)">
+                {{ getInitials(review.urserName) }}
+              </span>
+              <div class="review-meta">
+                <span class="review-author">{{ review.urserName }}</span>
+                <div class="review-subline">
+                  <span class="bubbles bubbles-sm" [attr.aria-label]="review.rating + ' out of 5'">
+                    <span class="bubbles-track">●●●●●</span>
+                    <span class="bubbles-fill" [style.width.%]="bubbleFillPercent(review.rating)">●●●●●</span>
+                  </span>
+                  <small *ngIf="review.createdAt" class="review-date">{{ review.createdAt }}</small>
+                </div>
+              </div>
+            </header>
+
+            <p class="review-comment">{{ review.comment }}</p>
+
+            <div class="replies-section" *ngIf="review.id">
+              <h4 *ngIf="(repliesMap[review.id] || []).length > 0">Replies</h4>
+              <div *ngIf="replyLoading[review.id]" class="muted-note">Loading replies...</div>
+              <div *ngIf="replyErrors[review.id]" class="error-message">{{ replyErrors[review.id] }}</div>
+
+              <div *ngFor="let reply of repliesMap[review.id] || []" class="reply">
+                <ng-container *ngIf="reply.id && replyEditing[reply.id]; else replyView">
+                  <textarea
+                    [(ngModel)]="replyEditDrafts[reply.id]"
+                    name="reply-edit-{{ reply.id }}"
+                  ></textarea>
+                  <div class="reply-actions">
+                    <button type="button" class="primary-btn" (click)="saveReply(review.id, reply)" [disabled]="replyUpdateSubmitting[reply.id]">
+                      {{ replyUpdateSubmitting[reply.id] ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button type="button" class="secondary-btn" (click)="cancelReplyEdit(reply)">Cancel</button>
+                  </div>
+                </ng-container>
+
+                <ng-template #replyView>
+                  <div class="reply-badge">↳ Owner reply</div>
+                  <p class="reply-text">{{ reply.text }}</p>
+                  <p *ngIf="reply.createdAt" class="reply-date"><small>{{ reply.createdAt }}</small></p>
+                  <div class="reply-actions" *ngIf="canManageReplies && reply.id">
+                    <button type="button" class="secondary-btn small" (click)="startReplyEdit(reply)">Edit</button>
+                    <button type="button" class="secondary-btn small" (click)="deleteReply(review.id, reply)" [disabled]="replyDeleteSubmitting[reply.id]">
+                      {{ replyDeleteSubmitting[reply.id] ? 'Deleting...' : 'Delete' }}
+                    </button>
+                  </div>
+                </ng-template>
+              </div>
+
+              <div class="reply-form" *ngIf="canManageReplies">
+                <label for="reply-{{ review.id }}">Add a reply</label>
+                <textarea
+                  id="reply-{{ review.id }}"
+                  [(ngModel)]="replyDrafts[review.id]"
+                  name="reply-{{ review.id }}"
+                  placeholder="Write a reply..."
+                ></textarea>
+                <button type="button" class="primary-btn" (click)="submitReply(review.id)" [disabled]="replySubmitting[review.id]">
+                  {{ replySubmitting[review.id] ? 'Sending...' : 'Send Reply' }}
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
     </div>
   </ng-container>
 
-  <div *ngIf="!loading && !restaurant && !error" class="empty-state">
-    Restaurant details are not available.
+  <div *ngIf="!loading && !restaurant && !error" class="container state-block">
+    <div class="empty-state">Restaurant details are not available.</div>
   </div>
 </div>

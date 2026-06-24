@@ -333,6 +333,50 @@ export class RestaurantDetail implements OnInit {
     );
   }
 
+  // ----------------------- View helpers -----------------------
+
+  /** Percentage (0-100) for a 0-5 rating, used to clip the filled bubbles overlay. */
+  bubbleFillPercent(value: number): number {
+    const v = Number.isFinite(value) ? value : 0;
+    return Math.max(0, Math.min(100, (v / 5) * 100));
+  }
+
+  /** Up to two uppercase initials for an avatar badge. */
+  getInitials(name?: string | null): string {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return '?';
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    const initials = parts.length === 1
+      ? parts[0].slice(0, 2)
+      : parts[0][0] + parts[parts.length - 1][0];
+    return initials.toUpperCase();
+  }
+
+  private readonly avatarGradients = [
+    'linear-gradient(135deg, #ffd166, #ef476f)',
+    'linear-gradient(135deg, #06d6a0, #118ab2)',
+    'linear-gradient(135deg, #8338ec, #3a86ff)',
+    'linear-gradient(135deg, #f72585, #b5179e)',
+    'linear-gradient(135deg, #ff9f1c, #ffbf69)',
+    'linear-gradient(135deg, #2ec4b6, #20a4f3)',
+    'linear-gradient(135deg, #e63946, #f77f00)',
+    'linear-gradient(135deg, #43aa8b, #f9c74f)',
+  ];
+
+  /** Deterministic gradient for an avatar based on a seed string. */
+  getAvatarGradient(seed?: string | null): string {
+    const s = (seed || '').trim();
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) {
+      hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+    }
+    return this.avatarGradients[hash % this.avatarGradients.length];
+  }
+
+  /** Strip protocol/trailing slash for a tidier website label. */
+  displayWebsite(url?: string | null): string {
+    return (url || '').replace(/^https?:\/\//i, '').replace(/\/$/, '');
+  }
 
   private log(message: string, data?: unknown): void {
     console.debug(`[RestaurantDetail] ${message}`, data ?? '');

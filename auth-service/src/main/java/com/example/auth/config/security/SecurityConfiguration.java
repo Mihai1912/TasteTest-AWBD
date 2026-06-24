@@ -39,6 +39,7 @@ public class SecurityConfiguration {
         if (securityEnabled) {
            http.authorizeHttpRequests(auth -> auth
                .requestMatchers("/actuator/**", "/api/v1/auth/login", "/api/v1/auth/register",
+                           "/error",
                            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                    .anyRequest().authenticated())

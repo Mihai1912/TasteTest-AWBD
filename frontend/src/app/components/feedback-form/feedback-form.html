@@ -1,4 +1,37 @@
-<div class="feedback-container">
+<!-- Admin view: inbox of feedback left by platform users -->
+<div *ngIf="isAdmin" class="feedback-page">
+  <div class="inbox-header">
+    <div>
+      <h2>User Feedback</h2>
+      <p class="inbox-subtitle">Feedback submitted by people using TasteTest.</p>
+    </div>
+    <span class="count-pill" *ngIf="!loadingFeedback && !feedbackError">
+      {{ feedbackEntries.length }} {{ feedbackEntries.length === 1 ? 'entry' : 'entries' }}
+    </span>
+  </div>
+
+  <div *ngIf="loadingFeedback" class="loading">Loading feedback...</div>
+  <div *ngIf="feedbackError" class="error-message">{{ feedbackError }}</div>
+
+  <p *ngIf="!loadingFeedback && !feedbackError && feedbackEntries.length === 0" class="empty-note">
+    No feedback has been submitted yet.
+  </p>
+
+  <div class="feedback-list" *ngIf="!loadingFeedback && feedbackEntries.length > 0">
+    <article *ngFor="let entry of feedbackEntries" class="feedback-card">
+      <div class="badge-row">
+        <span class="badge badge-type" *ngIf="entry.feedbackType">{{ pretty(entry.feedbackType) }}</span>
+        <span class="badge" [ngClass]="experienceClass(entry.experience)" *ngIf="entry.experience">
+          {{ pretty(entry.experience) }}
+        </span>
+      </div>
+      <p class="feedback-comment">{{ entry.comment }}</p>
+    </article>
+  </div>
+</div>
+
+<!-- Regular users: submit feedback -->
+<div *ngIf="!isAdmin" class="feedback-container">
   <h2>Send Feedback</h2>
   <form (ngSubmit)="submitFeedback()">
     <div class="form-group">

@@ -14,13 +14,14 @@ import { Assistant } from './components/assistant/assistant';
 import { Admin } from './components/admin/admin';
 import { NotFound } from './components/not-found/not-found';
 import { AuthGuard } from './guards/auth.guard';
+import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: Home },
   { path: 'login', component: Login },
   { path: 'register', component: Register },
-  { path: 'restaurants/add', component: RestaurantForm, canActivate: [AuthGuard] },
+  { path: 'restaurants/add', component: RestaurantForm, canActivate: [AuthGuard, RoleGuard], data: { roles: ['ADMIN', 'RESTAURANT_OWNER'] } },
   { path: 'restaurants/:id/edit', component: RestaurantForm, canActivate: [AuthGuard] },
   { path: 'restaurants/:id/review', component: ReviewForm, canActivate: [AuthGuard] },
   { path: 'restaurants/:id', component: RestaurantDetail, canActivate: [AuthGuard] },

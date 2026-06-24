@@ -9,10 +9,20 @@
     linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(250,249,246,1) 100%),
     linear-gradient(135deg, #c8f3df 0%, #f9f3c4 50%, #ffd7c2 100%);
   padding: 5rem 1.5rem 4rem;
-  overflow: hidden;
+  /* overflow stays visible so the search dropdown can spill below the hero;
+     the decorative circles are clipped by .hero-decor instead. */
+  overflow: visible;
 }
 
-.hero::before {
+.hero-decor {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-decor::before {
   content: "";
   position: absolute;
   top: -80px;
@@ -24,7 +34,7 @@
   opacity: 0.12;
 }
 
-.hero::after {
+.hero-decor::after {
   content: "";
   position: absolute;
   bottom: -100px;
@@ -38,6 +48,7 @@
 
 .hero-inner {
   position: relative;
+  z-index: 1;
   max-width: 880px;
   margin: 0 auto;
   text-align: center;
@@ -103,12 +114,91 @@
 }
 
 .search-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.3rem 0.3rem 0.3rem 1rem;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
+}
+
+/* --------------- Search suggestions (typeahead) --------------- */
+.suggestions {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+  background: var(--ta-green-soft);
+}
+
+.suggestion-icon {
+  flex-shrink: 0;
+  width: 2.3rem;
+  height: 2.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  background: var(--bg-subtle);
+  border-radius: 50%;
+}
+
+.suggestion-item:hover .suggestion-icon,
+.suggestion-item.active .suggestion-icon {
+  background: #fff;
+}
+
+.suggestion-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.suggestion-name {
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-empty {
+  padding: 0.9rem 0.8rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .search-icon {

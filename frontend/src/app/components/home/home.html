@@ -1,11 +1,12 @@
 <div class="home">
   <!-- Hero -->
   <section class="hero">
+    <div class="hero-decor"></div>
     <div class="hero-inner">
       <h1 class="hero-title">Where to? Find your next great meal.</h1>
       <p class="hero-subtitle">Search restaurants, browse menus, read honest reviews from our community.</p>
 
-      <form class="search-card" (submit)="$event.preventDefault()">
+      <form class="search-card" (submit)="onSubmit($event)">
         <div class="search-tabs">
           <button type="button" class="tab active">🍽 Restaurants</button>
           <button type="button" class="tab">📖 Menus</button>
@@ -14,8 +15,46 @@
         </div>
         <div class="search-row">
           <span class="search-icon">🔍</span>
-          <input type="text" placeholder="Places to eat, cuisines, dishes..." class="search-input" />
-          <a routerLink="/restaurants" class="btn primary-btn search-btn">Search</a>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Places to eat, cuisines, dishes..."
+            [(ngModel)]="query"
+            name="q"
+            autocomplete="off"
+            role="combobox"
+            aria-autocomplete="list"
+            [attr.aria-expanded]="showSuggestions"
+            (input)="onInput()"
+            (focus)="onFocus()"
+            (blur)="hideSuggestionsSoon()"
+            (keydown)="onKeydown($event)"
+          />
+          <button type="submit" class="btn primary-btn search-btn">Search</button>
+
+          <ul class="suggestions" *ngIf="showSuggestions" role="listbox">
+            <li *ngIf="loading" class="suggestion-empty">Searching…</li>
+
+            <li
+              *ngFor="let r of suggestions; let i = index"
+              class="suggestion-item"
+              role="option"
+              [class.active]="i === activeIndex"
+              [attr.aria-selected]="i === activeIndex"
+              (mousedown)="select(r)"
+              (mouseenter)="activeIndex = i"
+            >
+              <span class="suggestion-icon">🍽</span>
+              <span class="suggestion-text">
+                <span class="suggestion-name">{{ r.name }}</span>
+                <span class="suggestion-sub" *ngIf="r.address">{{ r.address }}</span>
+              </span>
+            </li>
+
+            <li *ngIf="!loading && suggestions.length === 0 && query.trim()" class="suggestion-empty">
+              No restaurants match “{{ query.trim() }}”.
+            </li>
+          </ul>
         </div>
       </form>
     </div>

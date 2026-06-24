@@ -1,104 +1,369 @@
-.container,
-.detail-container,
-.menu-container,
-.feedback-container,
-.admin-container {
-  max-width: 980px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
+/* ===========================================================
+   Restaurant detail — TasteTest themed (hero + cards)
+   =========================================================== */
+
+.restaurant-detail {
+  padding-bottom: 2rem;
 }
 
-.detail-header {
+.state-block {
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
+/* ----------------------------- Hero ----------------------------- */
+.detail-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, var(--bg) 100%),
+    linear-gradient(135deg, #c8f3df 0%, #f9f3c4 50%, #ffd7c2 100%);
+  padding: 2rem 0 2.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.5rem;
+}
+
+.detail-hero::before {
+  content: "";
+  position: absolute;
+  top: -90px;
+  right: -70px;
+  width: 260px;
+  height: 260px;
+  background: var(--ta-green);
+  border-radius: 50%;
+  opacity: 0.10;
+}
+
+.detail-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -110px;
+  left: -60px;
+  width: 220px;
+  height: 220px;
+  background: var(--ta-yellow);
+  border-radius: 50%;
+  opacity: 0.16;
+}
+
+.hero-inner {
+  position: relative;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ta-green-darker);
+}
+
+.hero-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1.5rem;
 }
 
-.detail-header h2 {
-  margin: 0;
-  font-size: 2.25rem;
-  letter-spacing: -0.025em;
-}
-
-.detail-container > p {
-  margin: 0.5rem 0;
-  font-size: 0.95rem;
-  color: var(--text);
-}
-
-.detail-container > p strong {
-  color: var(--ink);
-  font-weight: 700;
-  margin-right: 0.35rem;
-}
-
-.detail-container a {
+.eyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--ta-green-darker);
+  margin-bottom: 0.4rem;
+}
+
+.hero-headings h1 {
+  margin: 0;
+  font-size: 2.75rem;
+  letter-spacing: -0.03em;
+}
+
+.edit-btn {
+  flex-shrink: 0;
+}
+
+/* ----------------------- Rating bubbles ------------------------- */
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.bubbles {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.bubbles-track {
+  color: rgba(0, 0, 0, 0.16);
+}
+
+.bubbles-fill {
+  position: absolute;
+  inset: 0;
+  color: var(--ta-green);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.bubbles-sm {
+  font-size: 0.9rem;
+}
+
+.rating-value {
+  font-weight: 800;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.rating-meta {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* ------------------------- Info chips --------------------------- */
+.info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
   font-weight: 600;
+  color: var(--ink);
+}
+
+.chip-link {
+  text-decoration: none;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chip-link:hover {
+  background: #fff;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.chip-icon {
+  font-size: 1rem;
+}
+
+/* --------------------------- Body ------------------------------- */
+.detail-body {
+  padding: 2.5rem 1.5rem 4rem;
+  max-width: 920px;
 }
 
 .section {
-  margin-top: 2.5rem;
-  padding-top: 1.75rem;
-  border-top: 1px solid var(--border);
+  margin-top: 2.75rem;
 }
 
-.section h3 {
-  margin: 0 0 1rem;
-  font-size: 1.4rem;
+.section:first-child {
+  margin-top: 0;
 }
 
-.section h4 {
-  margin: 0.75rem 0 0.5rem;
-  font-size: 1rem;
-  color: var(--text);
-  font-weight: 700;
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
 }
 
-.review,
-.item {
-  padding: 1.1rem 1.25rem;
-  margin: 1rem 0;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--ta-green);
-  border-radius: var(--radius);
+.section-head h2 {
+  margin: 0;
+  font-size: 1.6rem;
 }
 
-.review p {
-  margin: 0.35rem 0;
-}
-
-.review p strong {
-  color: var(--ink);
-}
-
-.review small {
+.empty-note {
   color: var(--text-muted);
-  font-size: 0.82rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  text-align: center;
+  margin: 0;
 }
 
-.replies-section {
-  margin-top: 1rem;
-  padding-top: 0.85rem;
-  border-top: 1px dashed var(--border-strong);
+.muted-note {
+  color: var(--text-muted);
+  font-size: 0.88rem;
 }
 
-.reply {
-  margin: 0.75rem 0;
-  padding: 0.85rem 1rem;
+/* -------------------------- Menu cards -------------------------- */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--ta-green);
+  text-decoration: none;
+}
+
+.menu-icon {
+  font-size: 1.6rem;
+}
+
+.menu-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.menu-cta {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ta-green-darker);
+  margin-top: auto;
+}
+
+/* --------------------------- Reviews ---------------------------- */
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.review-author {
+  font-weight: 800;
+  color: var(--ink);
+  font-size: 1.02rem;
+  display: block;
+}
+
+.review-subline {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+}
+
+.review-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.review-comment {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* --------------------------- Replies ---------------------------- */
+.replies-section {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.replies-section h4 {
+  margin: 0 0 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+}
+
+.reply {
+  margin: 0.6rem 0;
+  padding: 0.9rem 1rem;
+  background: var(--ta-green-soft);
+  border: 1px solid #cfeede;
+  border-radius: var(--radius);
+}
+
+.reply-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ta-green-darker);
+  margin-bottom: 0.3rem;
+}
+
+.reply-text {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.reply-date {
+  margin: 0.35rem 0 0;
+}
+
+.reply-date small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 .reply textarea,
@@ -114,14 +379,15 @@
   margin-top: 0.65rem;
 }
 
-.reply-actions button {
-  padding: 0.45rem 0.95rem;
-  font-size: 0.85rem;
+.reply-actions button.small,
+.reply-actions .small {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
 }
 
 .reply-form {
   margin-top: 1rem;
-  padding: 1rem;
+  padding: 1rem 1.1rem;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -135,4 +401,23 @@
 
 .reply-form button {
   margin-top: 0.5rem;
+}
+
+/* ------------------------- Responsive --------------------------- */
+@media (max-width: 640px) {
+  .hero-headings h1 {
+    font-size: 2rem;
+  }
+
+  .detail-hero {
+    padding: 1.5rem 0 2rem;
+  }
+
+  .edit-btn {
+    width: 100%;
+  }
+
+  .chip-link {
+    max-width: 100%;
+  }
 }

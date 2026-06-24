@@ -5,7 +5,7 @@
         <h1>Restaurants</h1>
         <p class="page-subtitle">Discover places to eat, browse menus and read community reviews.</p>
       </div>
-      <a routerLink="/restaurants/add" class="btn primary-btn">+ Add Restaurant</a>
+      <a *ngIf="canManageRestaurants" routerLink="/restaurants/add" class="btn primary-btn">+ Add Restaurant</a>
     </div>
   </div>
 
@@ -39,7 +39,15 @@
              class="restaurant-card"
              [routerLink]="['/restaurants', restaurant.id]">
           <div class="card-media" [style.background]="getCardGradient(i)">
-            <span class="card-emoji">🍽</span>
+            <img
+              class="card-img"
+              [src]="getCardImage(restaurant, i)"
+              [alt]="restaurant.name"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+              (error)="onImageError($event)"
+            />
             <span class="card-badge">Featured</span>
           </div>
           <div class="card-body">
@@ -71,7 +79,15 @@
            class="restaurant-card"
            [routerLink]="['/restaurants', restaurant.id]">
         <div class="card-media" [style.background]="getCardGradient(i)">
-          <span class="card-emoji">⭐</span>
+          <img
+            class="card-img"
+            [src]="getCardImage(restaurant, i)"
+            [alt]="restaurant.name"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            (error)="onImageError($event)"
+          />
           <span class="card-badge gold">Top Rated</span>
         </div>
         <div class="card-body">

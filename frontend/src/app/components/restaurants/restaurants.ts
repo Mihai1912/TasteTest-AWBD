@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { RestaurantService } from '../../services/restaurant.service';
+import { AuthService } from '../../services/auth.service';
 import { RestaurantDto } from '../../models/restaurant.model';
 
 type SortField = 'name' | 'address' | 'phone';
@@ -35,12 +36,22 @@ export class Restaurants implements OnInit {
 
   constructor(
     private restaurantService: RestaurantService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadRestaurants();
     this.loadTopRated();
+  }
+
+  /** Only admins and restaurant owners may add restaurants (mirrors the backend). */
+  get canManageRestaurants(): boolean {
+    try {
+      return this.authService.isAdmin() || this.authService.hasRole('RESTAURANT_OWNER');
+    } catch {
+      return false;
+    }
   }
 
   loadRestaurants() {
@@ -117,7 +128,40 @@ export class Restaurants implements OnInit {
     'linear-gradient(135deg, #43aa8b, #f9c74f)',
   ];
 
+  // Curated food/restaurant photos (Unsplash). Used when a restaurant has no
+  // imageUrl of its own. The gradient stays behind as a loading/error fallback.
+  private readonly cardImages = [
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&q=80&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1481833761820-0509d3217039?w=800&q=80&auto=format&fit=crop',
+  ];
+
   getCardGradient(i: number): string {
     return this.cardGradients[i % this.cardGradients.length];
+  }
+
+  /** Stable photo for a restaurant: its own imageUrl, else a curated stock image. */
+  getCardImage(restaurant: RestaurantDto, i: number): string {
+    if (restaurant.imageUrl) {
+      return restaurant.imageUrl;
+    }
+    const seed = restaurant.id || restaurant.name || String(i);
+    let hash = 0;
+    for (let k = 0; k < seed.length; k++) {
+      hash = (hash * 31 + seed.charCodeAt(k)) >>> 0;
+    }
+    return this.cardImages[hash % this.cardImages.length];
+  }
+
+  /** Hide a broken image so the gradient fallback shows through. */
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.style.display = 'none';
   }
 }
